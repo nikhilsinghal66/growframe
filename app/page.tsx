@@ -6,6 +6,29 @@ const fadeUp = {
   visible: { opacity: 1, y: 0, filter: "blur(0px)" },
 };
 
+const services = [
+  {
+    title: "Video Editing",
+    description:
+      "Retention-led edits with precise pacing, clean structure, and a finish that keeps the creator's voice intact.",
+  },
+  {
+    title: "Thumbnail Design",
+    description:
+      "Refined concepts built for clarity at speed, pairing sharp visual hierarchy with platform-aware restraint.",
+  },
+  {
+    title: "Content Strategy",
+    description:
+      "A focused operating system for positioning, formats, hooks, and repeatable publishing momentum.",
+  },
+  {
+    title: "Short-form Scaling",
+    description:
+      "High-output short-form workflows that translate long-form ideas into concise, native growth assets.",
+  },
+];
+
 export default function Home() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#0A0A0A] px-5 text-[#F5F5F5] selection:bg-[#7C3AED]/35 md:px-8">
@@ -27,7 +50,7 @@ export default function Home() {
           </div>
 
           <div className="hidden items-center gap-7 text-sm font-medium text-zinc-400 md:flex">
-            <a href="#" className="transition-colors duration-300 hover:text-white">
+            <a href="#services" className="transition-colors duration-300 hover:text-white">
               Services
             </a>
             <a href="#" className="transition-colors duration-300 hover:text-white">
@@ -155,6 +178,77 @@ export default function Home() {
           </motion.div>
         </motion.div>
       </motion.section>
+
+      <section id="services" className="relative z-10 mx-auto w-full max-w-6xl py-24 md:py-32">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.35 }}
+          variants={{
+            hidden: {},
+            visible: {
+              transition: {
+                staggerChildren: 0.1,
+              },
+            },
+          }}
+          className="grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:gap-16"
+        >
+          <div className="max-w-xl">
+            <motion.p
+              variants={fadeUp}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              className="mb-5 text-xs font-medium uppercase tracking-[0.34em] text-zinc-500"
+            >
+              Services
+            </motion.p>
+
+            <motion.h2
+              variants={fadeUp}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="text-4xl font-semibold leading-tight tracking-normal text-white md:text-5xl"
+            >
+              Built for creators who treat content like a serious growth system.
+            </motion.h2>
+
+            <motion.p
+              variants={fadeUp}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="mt-6 text-base leading-8 text-zinc-400 md:text-lg"
+            >
+              Every service is designed to improve attention, consistency, and
+              output quality without adding noise to the creative process.
+            </motion.p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {services.map((service, index) => (
+              <motion.article
+                key={service.title}
+                variants={fadeUp}
+                transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+                className="group relative min-h-64 overflow-hidden rounded-lg border border-white/10 bg-white/[0.035] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.24)] backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.055] hover:shadow-[0_32px_100px_rgba(0,0,0,0.34)]"
+              >
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-60" />
+                <div className="flex h-full flex-col justify-between gap-10">
+                  <div>
+                    <p className="mb-7 text-xs font-medium text-zinc-600">
+                      0{index + 1}
+                    </p>
+                    <h3 className="text-2xl font-semibold tracking-normal text-white">
+                      {service.title}
+                    </h3>
+                  </div>
+
+                  <p className="text-sm leading-7 text-zinc-400 transition-colors duration-500 group-hover:text-zinc-300">
+                    {service.description}
+                  </p>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        </motion.div>
+      </section>
     </main>
   );
 }
