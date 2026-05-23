@@ -1,10 +1,54 @@
 "use client";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
+import type { ReactNode } from "react";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 22, filter: "blur(10px)" },
-  visible: { opacity: 1, y: 0, filter: "blur(0px)" },
+const smoothEase = [0.22, 1, 0.36, 1] as const;
+
+const revealContainer = (stagger = 0.1, delay = 0): Variants => ({
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: stagger,
+      delayChildren: delay,
+    },
+  },
+});
+
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 18, filter: "blur(8px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.78, ease: smoothEase },
+  },
 };
+
+function ScrollReveal({
+  children,
+  className,
+  amount = 0.28,
+  stagger = 0.1,
+  delay = 0,
+}: {
+  children: ReactNode;
+  className?: string;
+  amount?: number;
+  stagger?: number;
+  delay?: number;
+}) {
+  return (
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount }}
+      variants={revealContainer(stagger, delay)}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 const services = [
   {
@@ -26,6 +70,50 @@ const services = [
     title: "Short-form Scaling",
     description:
       "High-output short-form workflows that translate long-form ideas into concise, native growth assets.",
+  },
+];
+
+const portfolioProjects = [
+  {
+    title: "Tech Creator System",
+    category: "Long-form Growth",
+    description:
+      "A full editing and publishing system for a technical creator, designed around clarity, retention, and repeatable output.",
+  },
+  {
+    title: "Podcast Growth Edit",
+    category: "Authority Content",
+    description:
+      "A cinematic podcast workflow with tighter pacing, cleaner narrative arcs, and polished assets for multi-platform release.",
+  },
+  {
+    title: "Shorts Scaling Package",
+    category: "Short-form Engine",
+    description:
+      "A focused short-form package turning core ideas into high-velocity clips with consistent structure and visual discipline.",
+  },
+];
+
+const processSteps = [
+  {
+    title: "Discover",
+    description:
+      "We map your channel, audience, content gaps, and creative standards before touching the edit timeline.",
+  },
+  {
+    title: "Strategy",
+    description:
+      "We define the formats, hooks, packaging, and operating rhythm that give each upload a clear role.",
+  },
+  {
+    title: "Create",
+    description:
+      "We produce polished edits and assets with a tight feedback loop, built around retention and brand fit.",
+  },
+  {
+    title: "Scale",
+    description:
+      "We turn what works into repeatable systems for volume, consistency, and compounding creator growth.",
   },
 ];
 
@@ -53,10 +141,10 @@ export default function Home() {
             <a href="#services" className="transition-colors duration-300 hover:text-white">
               Services
             </a>
-            <a href="#" className="transition-colors duration-300 hover:text-white">
+            <a href="#portfolio" className="transition-colors duration-300 hover:text-white">
               Portfolio
             </a>
-            <a href="#" className="transition-colors duration-300 hover:text-white">
+            <a href="#process" className="transition-colors duration-300 hover:text-white">
               Process
             </a>
           </div>
@@ -180,24 +268,13 @@ export default function Home() {
       </motion.section>
 
       <section id="services" className="relative z-10 mx-auto w-full max-w-6xl py-24 md:py-32">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.35 }}
-          variants={{
-            hidden: {},
-            visible: {
-              transition: {
-                staggerChildren: 0.1,
-              },
-            },
-          }}
+        <ScrollReveal
+          amount={0.35}
           className="grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:gap-16"
         >
           <div className="max-w-xl">
             <motion.p
               variants={fadeUp}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               className="mb-5 text-xs font-medium uppercase tracking-[0.34em] text-zinc-500"
             >
               Services
@@ -205,7 +282,6 @@ export default function Home() {
 
             <motion.h2
               variants={fadeUp}
-              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
               className="text-4xl font-semibold leading-tight tracking-normal text-white md:text-5xl"
             >
               Built for creators who treat content like a serious growth system.
@@ -213,7 +289,6 @@ export default function Home() {
 
             <motion.p
               variants={fadeUp}
-              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
               className="mt-6 text-base leading-8 text-zinc-400 md:text-lg"
             >
               Every service is designed to improve attention, consistency, and
@@ -226,7 +301,6 @@ export default function Home() {
               <motion.article
                 key={service.title}
                 variants={fadeUp}
-                transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
                 className="group relative min-h-64 overflow-hidden rounded-lg border border-white/10 bg-white/[0.035] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.24)] backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.055] hover:shadow-[0_32px_100px_rgba(0,0,0,0.34)]"
               >
                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-60" />
@@ -247,7 +321,179 @@ export default function Home() {
               </motion.article>
             ))}
           </div>
-        </motion.div>
+        </ScrollReveal>
+      </section>
+
+      <section id="portfolio" className="relative z-10 mx-auto w-full max-w-6xl py-24 md:py-32">
+        <ScrollReveal amount={0.25} stagger={0.12}>
+          <div className="mb-12 flex flex-col justify-between gap-6 md:mb-16 md:flex-row md:items-end">
+            <div className="max-w-2xl">
+              <motion.p
+                variants={fadeUp}
+                className="mb-5 text-xs font-medium uppercase tracking-[0.34em] text-zinc-500"
+              >
+                Portfolio
+              </motion.p>
+
+              <motion.h2
+                variants={fadeUp}
+                className="text-4xl font-semibold leading-tight tracking-normal text-white md:text-5xl"
+              >
+                Selected systems for creators building durable audience growth.
+              </motion.h2>
+            </div>
+
+            <motion.p
+              variants={fadeUp}
+              className="max-w-sm text-sm leading-7 text-zinc-400"
+            >
+              A restrained look at the editorial, thumbnail, and scaling
+              systems behind creator channels built to compound.
+            </motion.p>
+          </div>
+
+          <div className="grid gap-5 lg:grid-cols-3">
+            {portfolioProjects.map((project, index) => (
+              <motion.article
+                key={project.title}
+                variants={fadeUp}
+                className="group relative overflow-hidden rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-[0_28px_90px_rgba(0,0,0,0.28)] backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.055] hover:shadow-[0_36px_120px_rgba(0,0,0,0.4)]"
+              >
+                <div className="relative aspect-[16/11] overflow-hidden rounded-lg border border-white/10 bg-[#101010]">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_18%,rgba(124,58,237,0.24),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_42%,rgba(255,255,255,0.035))] opacity-80 transition-transform duration-700 group-hover:scale-105" />
+                  <div className="absolute inset-x-5 top-5 flex items-center justify-between">
+                    <span className="h-2 w-16 rounded-full bg-white/18" />
+                    <span className="text-[10px] font-medium uppercase tracking-[0.24em] text-white/35">
+                      0{index + 1}
+                    </span>
+                  </div>
+                  <div className="absolute inset-x-5 bottom-5 space-y-3">
+                    <div className="h-2 w-3/4 rounded-full bg-white/18" />
+                    <div className="h-2 w-1/2 rounded-full bg-white/10" />
+                  </div>
+                  <div className="absolute bottom-5 right-5 h-16 w-16 rounded-lg border border-white/10 bg-white/[0.045] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-xl transition-transform duration-700 group-hover:translate-y-[-3px]" />
+                </div>
+
+                <div className="px-3 pb-3 pt-6">
+                  <p className="mb-4 text-xs font-medium uppercase tracking-[0.26em] text-zinc-500">
+                    {project.category}
+                  </p>
+                  <h3 className="text-2xl font-semibold tracking-normal text-white">
+                    {project.title}
+                  </h3>
+                  <p className="mt-4 text-sm leading-7 text-zinc-400 transition-colors duration-500 group-hover:text-zinc-300">
+                    {project.description}
+                  </p>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        </ScrollReveal>
+      </section>
+
+      <section id="process" className="relative z-10 mx-auto w-full max-w-6xl py-24 md:py-32">
+        <ScrollReveal amount={0.25} stagger={0.11}>
+          <div className="mx-auto mb-14 max-w-3xl text-center md:mb-20">
+            <motion.p
+              variants={fadeUp}
+              className="mb-5 text-xs font-medium uppercase tracking-[0.34em] text-zinc-500"
+            >
+              Process
+            </motion.p>
+
+            <motion.h2
+              variants={fadeUp}
+              className="text-4xl font-semibold leading-tight tracking-normal text-white md:text-5xl"
+            >
+              A clear operating rhythm from first audit to scaled output.
+            </motion.h2>
+
+            <motion.p
+              variants={fadeUp}
+              className="mx-auto mt-6 max-w-2xl text-base leading-8 text-zinc-400"
+            >
+              The workflow is structured to remove ambiguity, protect creative
+              quality, and keep every decision connected to channel growth.
+            </motion.p>
+          </div>
+
+          <div className="relative">
+            <div className="absolute left-0 right-0 top-8 hidden h-px bg-gradient-to-r from-transparent via-white/15 to-transparent md:block" />
+
+            <div className="grid gap-4 md:grid-cols-4">
+              {processSteps.map((step, index) => (
+                <motion.article
+                  key={step.title}
+                  variants={fadeUp}
+                  className="group relative rounded-lg border border-white/10 bg-white/[0.03] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.05] hover:shadow-[0_32px_100px_rgba(0,0,0,0.34)]"
+                >
+                  <div className="relative z-10 mb-10 flex items-center justify-between">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-white/10 bg-[#111111]/90 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-colors duration-500 group-hover:border-[#7C3AED]/40">
+                      0{index + 1}
+                    </div>
+                    <div className="h-px flex-1 bg-white/10 md:hidden" />
+                  </div>
+
+                  <h3 className="text-2xl font-semibold tracking-normal text-white">
+                    {step.title}
+                  </h3>
+                  <p className="mt-5 text-sm leading-7 text-zinc-400 transition-colors duration-500 group-hover:text-zinc-300">
+                    {step.description}
+                  </p>
+                </motion.article>
+              ))}
+            </div>
+          </div>
+        </ScrollReveal>
+      </section>
+
+      <section className="relative z-10 mx-auto w-full max-w-6xl pb-24 pt-16 md:pb-32 md:pt-24">
+        <ScrollReveal
+          amount={0.35}
+          stagger={0.12}
+          className="relative overflow-hidden rounded-lg border border-white/10 bg-white/[0.035] px-6 py-16 text-center shadow-[0_40px_140px_rgba(0,0,0,0.42)] backdrop-blur-2xl md:px-12 md:py-24"
+        >
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_0%,rgba(124,58,237,0.18),transparent_42%),linear-gradient(180deg,rgba(255,255,255,0.055),transparent_34%)]" />
+          <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+
+          <div className="relative mx-auto max-w-4xl">
+            <motion.p
+              variants={fadeUp}
+              className="mb-6 text-xs font-medium uppercase tracking-[0.34em] text-zinc-500"
+            >
+              Growframe
+            </motion.p>
+
+            <motion.h2
+              variants={fadeUp}
+              className="text-5xl font-semibold leading-[1.02] tracking-normal text-white md:text-7xl"
+            >
+              Built for creators serious about growth.
+            </motion.h2>
+
+            <motion.p
+              variants={fadeUp}
+              className="mx-auto mt-7 max-w-2xl text-base leading-8 text-zinc-400 md:text-lg"
+            >
+              We help creators turn attention into consistent momentum through
+              refined editing, systems, and scalable content operations.
+            </motion.p>
+
+            <motion.div
+              variants={fadeUp}
+              className="mt-10 flex flex-col items-center justify-center gap-4"
+            >
+              <button className="w-full rounded-full bg-[#7C3AED] px-8 py-4 text-sm font-semibold text-white shadow-[0_22px_80px_rgba(124,58,237,0.38),inset_0_1px_0_rgba(255,255,255,0.16)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#8B5CF6] hover:shadow-[0_28px_100px_rgba(124,58,237,0.46),inset_0_1px_0_rgba(255,255,255,0.18)] sm:w-auto">
+                Book a Free Strategy Call
+              </button>
+
+              <p className="text-sm text-zinc-500">
+                For creators ready to build with more clarity, consistency, and
+                taste.
+              </p>
+            </motion.div>
+          </div>
+        </ScrollReveal>
       </section>
     </main>
   );
