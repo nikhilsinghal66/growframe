@@ -1,13 +1,17 @@
 "use client";
 import {
   AnimatePresence,
+  MotionConfig,
   motion,
   useMotionValueEvent,
+  useMotionValue,
+  useReducedMotion,
   useScroll,
+  useSpring,
   type Variants,
 } from "framer-motion";
 import Image from "next/image";
-import type { ChangeEvent, FormEvent, ReactNode } from "react";
+import type { ChangeEvent, FormEvent, PointerEvent, ReactNode } from "react";
 import { useState } from "react";
 
 const smoothEase = [0.22, 1, 0.36, 1] as const;
@@ -22,7 +26,7 @@ const revealContainer = (stagger = 0.1, delay = 0): Variants => ({
   },
 });
 
-const fadeUp: Variants = {
+const cinematicFadeUp: Variants = {
   hidden: { opacity: 0, y: 18, filter: "blur(8px)" },
   visible: {
     opacity: 1,
@@ -32,8 +36,21 @@ const fadeUp: Variants = {
   },
 };
 
-const tactileHover = { y: -3, scale: 1.01 };
-const tactileTap = { scale: 0.985 };
+const reducedFadeUp: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.32, ease: "easeOut" },
+  },
+};
+
+const magneticSpring = { stiffness: 180, damping: 18, mass: 0.45 };
+const magneticTransition = {
+  type: "spring",
+  stiffness: 260,
+  damping: 22,
+  mass: 0.55,
+} as const;
 
 const navLinks = [
   { label: "Services", href: "#services" },
@@ -62,16 +79,83 @@ function ScrollReveal({
   stagger?: number;
   delay?: number;
 }) {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <motion.div
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount }}
-      variants={revealContainer(stagger, delay)}
+      viewport={{ once: true, amount, margin: "0px 0px -8% 0px" }}
+      variants={
+        shouldReduceMotion ? revealContainer(0, 0) : revealContainer(stagger, delay)
+      }
       className={className}
     >
       {children}
     </motion.div>
+  );
+}
+
+function MagneticButton({
+  children,
+  className,
+  href,
+  type = "button",
+  disabled = false,
+}: {
+  children: ReactNode;
+  className: string;
+  href?: string;
+  type?: "button" | "submit";
+  disabled?: boolean;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+  const xValue = useMotionValue(0);
+  const yValue = useMotionValue(0);
+  const x = useSpring(xValue, magneticSpring);
+  const y = useSpring(yValue, magneticSpring);
+  const motionDisabled = disabled || shouldReduceMotion;
+
+  const moveTowardPointer = (event: PointerEvent<HTMLElement>) => {
+    if (motionDisabled || event.pointerType !== "mouse") {
+      return;
+    }
+
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const xOffset = event.clientX - bounds.left - bounds.width / 2;
+    const yOffset = event.clientY - bounds.top - bounds.height / 2;
+
+    xValue.set((xOffset / bounds.width) * 12);
+    yValue.set((yOffset / bounds.height) * 9);
+  };
+
+  const resetPosition = () => {
+    xValue.set(0);
+    yValue.set(0);
+  };
+
+  const motionProps = {
+    className,
+    style: { x, y },
+    onPointerMove: moveTowardPointer,
+    onPointerLeave: resetPosition,
+    whileHover: motionDisabled ? undefined : { scale: 1.018 },
+    whileTap: motionDisabled ? undefined : { scale: 0.985 },
+    transition: magneticTransition,
+  };
+
+  if (href) {
+    return (
+      <motion.a href={href} {...motionProps}>
+        {children}
+      </motion.a>
+    );
+  }
+
+  return (
+    <motion.button type={type} disabled={disabled} {...motionProps}>
+      {children}
+    </motion.button>
   );
 }
 
@@ -151,6 +235,11 @@ export default function Home() {
   >("idle");
   const [contactError, setContactError] = useState("");
   const { scrollY } = useScroll();
+  const shouldReduceMotion = useReducedMotion();
+  const fadeUp = shouldReduceMotion ? reducedFadeUp : cinematicFadeUp;
+  const cardHover = shouldReduceMotion ? undefined : { y: -4, scale: 1.006 };
+  const floatingMotion = shouldReduceMotion ? { y: 0 } : { y: [0, -10, 0] };
+  const floatingMotionAlt = shouldReduceMotion ? { y: 0 } : { y: [0, 12, 0] };
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setNavElevated(latest > 24);
@@ -244,6 +333,7 @@ export default function Home() {
   };
 
   return (
+    <MotionConfig reducedMotion="user">
     <main className="relative min-h-screen overflow-hidden bg-[#0A0A0A] px-4 text-[#F5F5F5] selection:bg-[#7C3AED]/35 sm:px-6 lg:px-8">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-15%,rgba(124,58,237,0.24),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.045),transparent_18%,rgba(0,0,0,0.58)_86%)]" />
@@ -296,12 +386,12 @@ export default function Home() {
             </div>
 
             <div className="hidden items-center md:flex">
-              <a
+              <MagneticButton
                 href="#contact"
                 className="min-h-10 rounded-full border border-white/10 bg-white/10 px-5 py-2 text-sm font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition-all duration-500 ease-out hover:-translate-y-0.5 hover:border-[#7C3AED]/50 hover:bg-[#7C3AED]/20 hover:shadow-[0_16px_50px_rgba(124,58,237,0.24),inset_0_1px_0_rgba(255,255,255,0.16)] active:translate-y-0 active:scale-[0.98]"
               >
                 Contact
-              </a>
+              </MagneticButton>
             </div>
 
             <button
@@ -409,23 +499,17 @@ export default function Home() {
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             className="mt-8 flex flex-col items-center justify-center gap-3 sm:mt-9 sm:flex-row lg:justify-start"
           >
-            <motion.button
-              whileHover={tactileHover}
-              whileTap={tactileTap}
-              transition={{ duration: 0.28, ease: smoothEase }}
+            <MagneticButton
               className="min-h-12 w-full rounded-full bg-[#7C3AED] px-7 py-3.5 text-sm font-semibold text-white shadow-[0_18px_60px_rgba(124,58,237,0.34),inset_0_1px_0_rgba(255,255,255,0.16)] transition-shadow duration-500 ease-out hover:bg-[#8B5CF6] hover:shadow-[0_24px_85px_rgba(124,58,237,0.46),inset_0_1px_0_rgba(255,255,255,0.2)] sm:w-auto"
             >
               View Work
-            </motion.button>
+            </MagneticButton>
 
-            <motion.button
-              whileHover={tactileHover}
-              whileTap={tactileTap}
-              transition={{ duration: 0.28, ease: smoothEase }}
+            <MagneticButton
               className="min-h-12 w-full rounded-full border border-white/10 bg-white/[0.035] px-7 py-3.5 text-sm font-semibold text-zinc-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-xl transition-colors duration-500 ease-out hover:border-white/20 hover:bg-white/[0.07] hover:text-white sm:w-auto"
             >
               Free Sample Edit
-            </motion.button>
+            </MagneticButton>
           </motion.div>
         </div>
 
@@ -435,7 +519,7 @@ export default function Home() {
           className="relative mx-auto hidden h-[520px] w-full max-w-[440px] lg:block"
         >
           <motion.div
-            animate={{ y: [0, -10, 0] }}
+            animate={floatingMotion}
             transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
             className="absolute left-4 top-8 h-[430px] w-[310px] rotate-[-7deg] rounded-lg border border-white/10 bg-white/[0.045] p-3 shadow-[0_40px_120px_rgba(0,0,0,0.58)] backdrop-blur-2xl"
           >
@@ -460,7 +544,7 @@ export default function Home() {
           </motion.div>
 
           <motion.div
-            animate={{ y: [0, 12, 0] }}
+            animate={floatingMotionAlt}
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
             className="absolute right-0 top-24 h-[360px] w-[255px] rotate-[8deg] rounded-lg border border-white/10 bg-[#151515]/80 p-4 shadow-[0_32px_100px_rgba(0,0,0,0.5)] backdrop-blur-xl"
           >
@@ -516,7 +600,7 @@ export default function Home() {
               <motion.article
                 key={service.title}
                 variants={fadeUp}
-                whileHover={{ y: -4, scale: 1.006 }}
+                whileHover={cardHover}
                 transition={{ duration: 0.32, ease: smoothEase }}
                 className="group relative min-h-56 overflow-hidden rounded-lg border border-white/10 bg-white/[0.035] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.24)] backdrop-blur-xl transition-colors duration-500 ease-out hover:border-white/20 hover:bg-white/[0.055] hover:shadow-[0_34px_110px_rgba(0,0,0,0.38)] sm:min-h-64 sm:p-6"
               >
@@ -575,7 +659,7 @@ export default function Home() {
               <motion.article
                 key={project.title}
                 variants={fadeUp}
-                whileHover={{ y: -4, scale: 1.006 }}
+                whileHover={cardHover}
                 transition={{ duration: 0.32, ease: smoothEase }}
                 className="group relative overflow-hidden rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-[0_28px_90px_rgba(0,0,0,0.28)] backdrop-blur-xl transition-colors duration-500 ease-out hover:border-white/20 hover:bg-white/[0.055] hover:shadow-[0_38px_130px_rgba(0,0,0,0.44)]"
               >
@@ -645,7 +729,7 @@ export default function Home() {
                 <motion.article
                   key={step.title}
                   variants={fadeUp}
-                  whileHover={{ y: -4, scale: 1.006 }}
+                  whileHover={cardHover}
                   transition={{ duration: 0.32, ease: smoothEase }}
                   className="group relative overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-colors duration-500 ease-out hover:border-white/20 hover:bg-white/[0.05] hover:shadow-[0_34px_110px_rgba(0,0,0,0.38)] sm:p-6"
                 >
@@ -800,18 +884,15 @@ export default function Home() {
                 )}
               </div>
 
-              <motion.button
+              <MagneticButton
                 type="submit"
                 disabled={contactStatus === "submitting"}
-                whileHover={contactStatus === "submitting" ? undefined : tactileHover}
-                whileTap={contactStatus === "submitting" ? undefined : tactileTap}
-                transition={{ duration: 0.28, ease: smoothEase }}
                 className="min-h-12 w-full rounded-full bg-[#7C3AED] px-8 py-4 text-sm font-semibold text-white shadow-[0_22px_80px_rgba(124,58,237,0.36),inset_0_1px_0_rgba(255,255,255,0.16)] transition-all duration-500 ease-out hover:bg-[#8B5CF6] hover:shadow-[0_30px_110px_rgba(124,58,237,0.46),inset_0_1px_0_rgba(255,255,255,0.2)] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
               >
                 {contactStatus === "submitting"
                   ? "Sending inquiry..."
                   : "Send Inquiry"}
-              </motion.button>
+              </MagneticButton>
             </div>
           </motion.form>
         </ScrollReveal>
@@ -853,15 +934,12 @@ export default function Home() {
               variants={fadeUp}
               className="mt-9 flex flex-col items-center justify-center gap-4 sm:mt-10"
             >
-              <motion.a
+              <MagneticButton
                 href="#contact"
-                whileHover={tactileHover}
-                whileTap={tactileTap}
-                transition={{ duration: 0.28, ease: smoothEase }}
                 className="flex min-h-12 w-full items-center justify-center rounded-full bg-[#7C3AED] px-8 py-4 text-sm font-semibold text-white shadow-[0_22px_80px_rgba(124,58,237,0.38),inset_0_1px_0_rgba(255,255,255,0.16)] transition-shadow duration-500 ease-out hover:bg-[#8B5CF6] hover:shadow-[0_30px_110px_rgba(124,58,237,0.5),inset_0_1px_0_rgba(255,255,255,0.2)] sm:w-auto"
               >
                 Book a Free Strategy Call
-              </motion.a>
+              </MagneticButton>
 
               <p className="max-w-sm text-sm leading-6 text-zinc-500">
                 For creators ready to build with more clarity, consistency, and
@@ -930,5 +1008,6 @@ export default function Home() {
         </ScrollReveal>
       </footer>
     </main>
+    </MotionConfig>
   );
 }
