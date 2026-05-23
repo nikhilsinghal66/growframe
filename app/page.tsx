@@ -12,7 +12,7 @@ import {
 } from "framer-motion";
 import Image from "next/image";
 import type { ChangeEvent, FormEvent, PointerEvent, ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const smoothEase = [0.22, 1, 0.36, 1] as const;
 
@@ -51,6 +51,25 @@ const magneticTransition = {
   damping: 22,
   mass: 0.55,
 } as const;
+const cardSpring = { stiffness: 170, damping: 20, mass: 0.6 };
+const cardTransition = {
+  type: "spring",
+  stiffness: 230,
+  damping: 24,
+  mass: 0.65,
+} as const;
+
+type CursorState = "default" | "button" | "card" | "link";
+
+const cursorStyles: Record<
+  CursorState,
+  { size: number; opacity: number; borderOpacity: number; glowOpacity: number }
+> = {
+  default: { size: 18, opacity: 0.28, borderOpacity: 0.28, glowOpacity: 0.08 },
+  button: { size: 42, opacity: 0.36, borderOpacity: 0.46, glowOpacity: 0.18 },
+  card: { size: 56, opacity: 0.26, borderOpacity: 0.34, glowOpacity: 0.14 },
+  link: { size: 32, opacity: 0.32, borderOpacity: 0.4, glowOpacity: 0.12 },
+};
 
 const navLinks = [
   { label: "Services", href: "#services" },
@@ -96,6 +115,130 @@ function ScrollReveal({
   );
 }
 
+function Atmosphere() {
+  const shouldReduceMotion = useReducedMotion();
+  const slowDrift = shouldReduceMotion
+    ? {}
+    : {
+        x: [0, 18, -10, 0],
+        y: [0, -22, 12, 0],
+        scale: [1, 1.04, 0.98, 1],
+      };
+  const slowDriftAlt = shouldReduceMotion
+    ? {}
+    : {
+        x: [0, -14, 16, 0],
+        y: [0, 18, -10, 0],
+        scale: [1, 0.97, 1.03, 1],
+      };
+
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-14%,rgba(124,58,237,0.20),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.045),transparent_16%,rgba(0,0,0,0.62)_88%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:72px_72px] opacity-[0.055] [mask-image:radial-gradient(ellipse_at_center,black_16%,transparent_74%)]" />
+
+      <motion.div
+        animate={slowDrift}
+        transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute left-1/2 top-[-18rem] h-[36rem] w-[52rem] -translate-x-1/2 rounded-full bg-[#7C3AED]/14 blur-[150px]"
+      />
+      <motion.div
+        animate={slowDriftAlt}
+        transition={{ duration: 34, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute right-[-18rem] top-[34rem] h-[42rem] w-[42rem] rounded-full bg-[#A78BFA]/8 blur-[160px]"
+      />
+      <motion.div
+        animate={slowDrift}
+        transition={{ duration: 40, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-[18rem] left-[-20rem] h-[44rem] w-[44rem] rounded-full bg-[#7C3AED]/9 blur-[180px]"
+      />
+
+      <div className="absolute inset-x-0 top-[46rem] h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="absolute inset-x-0 top-[118rem] h-px bg-gradient-to-r from-transparent via-[#7C3AED]/18 to-transparent" />
+      <div className="absolute inset-x-0 top-[196rem] h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-72 bg-gradient-to-t from-[#0A0A0A] to-transparent" />
+    </div>
+  );
+}
+
+function CustomCursor() {
+  const shouldReduceMotion = useReducedMotion();
+  const [enabled, setEnabled] = useState(false);
+  const [cursorState, setCursorState] = useState<CursorState>("default");
+  const [visible, setVisible] = useState(false);
+  const xValue = useMotionValue(-100);
+  const yValue = useMotionValue(-100);
+  const x = useSpring(xValue, { stiffness: 520, damping: 44, mass: 0.35 });
+  const y = useSpring(yValue, { stiffness: 520, damping: 44, mass: 0.35 });
+  const style = cursorStyles[cursorState];
+
+  useEffect(() => {
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const updateEnabled = () =>
+      setEnabled(!shouldReduceMotion && finePointer.matches);
+
+    window.requestAnimationFrame(updateEnabled);
+    finePointer.addEventListener("change", updateEnabled);
+
+    return () => finePointer.removeEventListener("change", updateEnabled);
+  }, [shouldReduceMotion]);
+
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
+    const handlePointerMove = (event: globalThis.PointerEvent) => {
+      xValue.set(event.clientX);
+      yValue.set(event.clientY);
+      setVisible(true);
+
+      const target = event.target instanceof Element ? event.target : null;
+      const cursorTarget = target?.closest<HTMLElement>("[data-cursor]");
+      const nextState = cursorTarget?.dataset.cursor as CursorState | undefined;
+
+      setCursorState(nextState ?? "default");
+    };
+
+    const handlePointerLeave = () => setVisible(false);
+
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    document.documentElement.addEventListener("mouseleave", handlePointerLeave);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      document.documentElement.removeEventListener("mouseleave", handlePointerLeave);
+    };
+  }, [enabled, xValue, yValue]);
+
+  if (!enabled) {
+    return null;
+  }
+
+  return (
+    <motion.div
+      aria-hidden="true"
+      className="pointer-events-none fixed left-0 top-0 z-[80] hidden -translate-x-1/2 -translate-y-1/2 rounded-full mix-blend-screen md:block"
+      style={{
+        x,
+        y,
+        width: style.size,
+        height: style.size,
+        opacity: visible ? 1 : 0,
+        border: `1px solid rgba(245,245,245,${style.borderOpacity})`,
+        background: `radial-gradient(circle, rgba(167,139,250,${style.opacity}), rgba(124,58,237,${style.glowOpacity}) 45%, transparent 72%)`,
+        boxShadow: `0 0 ${Math.round(style.size * 1.4)}px rgba(124,58,237,${style.glowOpacity})`,
+      }}
+      animate={{
+        width: style.size,
+        height: style.size,
+        opacity: visible ? 1 : 0,
+      }}
+      transition={{ type: "spring", stiffness: 260, damping: 28, mass: 0.5 }}
+    />
+  );
+}
+
 function MagneticButton({
   children,
   className,
@@ -136,6 +279,7 @@ function MagneticButton({
 
   const motionProps = {
     className,
+    "data-cursor": "button",
     style: { x, y },
     onPointerMove: moveTowardPointer,
     onPointerLeave: resetPosition,
@@ -156,6 +300,75 @@ function MagneticButton({
     <motion.button type={type} disabled={disabled} {...motionProps}>
       {children}
     </motion.button>
+  );
+}
+
+function PremiumCard({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className: string;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+  const rotateXValue = useMotionValue(0);
+  const rotateYValue = useMotionValue(0);
+  const glowXValue = useMotionValue(50);
+  const glowYValue = useMotionValue(0);
+  const rotateX = useSpring(rotateXValue, cardSpring);
+  const rotateY = useSpring(rotateYValue, cardSpring);
+  const glowX = useSpring(glowXValue, cardSpring);
+  const glowY = useSpring(glowYValue, cardSpring);
+
+  const moveCard = (event: PointerEvent<HTMLElement>) => {
+    if (shouldReduceMotion || event.pointerType !== "mouse") {
+      return;
+    }
+
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const pointerX = event.clientX - bounds.left;
+    const pointerY = event.clientY - bounds.top;
+    const xPercent = pointerX / bounds.width;
+    const yPercent = pointerY / bounds.height;
+
+    rotateXValue.set((0.5 - yPercent) * 3);
+    rotateYValue.set((xPercent - 0.5) * 3);
+    glowXValue.set(xPercent * 100);
+    glowYValue.set(yPercent * 100);
+  };
+
+  const resetCard = () => {
+    rotateXValue.set(0);
+    rotateYValue.set(0);
+    glowXValue.set(50);
+    glowYValue.set(0);
+  };
+
+  return (
+    <motion.article
+      data-cursor="card"
+      variants={shouldReduceMotion ? reducedFadeUp : cinematicFadeUp}
+      whileHover={shouldReduceMotion ? undefined : { y: -5, scale: 1.008 }}
+      transition={cardTransition}
+      onPointerMove={moveCard}
+      onPointerLeave={resetCard}
+      style={{
+        rotateX,
+        rotateY,
+        transformPerspective: 900,
+      }}
+      className={className}
+    >
+      <motion.div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        style={{
+          background: `radial-gradient(circle at ${glowX}% ${glowY}%, rgba(124,58,237,0.16), transparent 38%)`,
+        }}
+      />
+      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),transparent_36%,rgba(255,255,255,0.035))]" />
+      {children}
+    </motion.article>
   );
 }
 
@@ -228,6 +441,7 @@ const processSteps = [
 
 export default function Home() {
   const [navElevated, setNavElevated] = useState(false);
+  const [navHidden, setNavHidden] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [contactForm, setContactForm] = useState(initialContactForm);
   const [contactStatus, setContactStatus] = useState<
@@ -235,14 +449,19 @@ export default function Home() {
   >("idle");
   const [contactError, setContactError] = useState("");
   const { scrollY } = useScroll();
+  const previousScrollY = useRef(0);
   const shouldReduceMotion = useReducedMotion();
   const fadeUp = shouldReduceMotion ? reducedFadeUp : cinematicFadeUp;
-  const cardHover = shouldReduceMotion ? undefined : { y: -4, scale: 1.006 };
   const floatingMotion = shouldReduceMotion ? { y: 0 } : { y: [0, -10, 0] };
   const floatingMotionAlt = shouldReduceMotion ? { y: 0 } : { y: [0, 12, 0] };
 
   useMotionValueEvent(scrollY, "change", (latest) => {
+    const previous = previousScrollY.current;
+    const scrollingDown = latest > previous && latest > 140;
+
     setNavElevated(latest > 24);
+    setNavHidden(scrollingDown && !mobileNavOpen);
+    previousScrollY.current = latest;
 
     if (latest > 80) {
       setMobileNavOpen(false);
@@ -335,29 +554,44 @@ export default function Home() {
   return (
     <MotionConfig reducedMotion="user">
     <main className="relative min-h-screen overflow-hidden bg-[#0A0A0A] px-4 text-[#F5F5F5] selection:bg-[#7C3AED]/35 sm:px-6 lg:px-8">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-15%,rgba(124,58,237,0.24),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.045),transparent_18%,rgba(0,0,0,0.58)_86%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:72px_72px] opacity-[0.08] [mask-image:radial-gradient(ellipse_at_center,black_18%,transparent_72%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#0A0A0A] to-transparent" />
-      </div>
+      <Atmosphere />
+      <CustomCursor />
 
       <motion.header
-        initial={{ opacity: 0, y: -18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: smoothEase }}
-        className="sticky top-0 z-50 -mx-4 flex w-[calc(100%+2rem)] items-center justify-center px-4 py-3 sm:-mx-6 sm:w-[calc(100%+3rem)] sm:px-6 sm:py-4 lg:-mx-8 lg:w-[calc(100%+4rem)] lg:px-8"
+        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -18 }}
+        animate={{ opacity: 1, y: shouldReduceMotion ? 0 : navHidden ? -86 : 0 }}
+        transition={{
+          duration: shouldReduceMotion ? 0.18 : 0.55,
+          ease: smoothEase,
+        }}
+        className={`sticky top-0 z-50 -mx-4 flex w-[calc(100%+2rem)] items-center justify-center px-4 transition-[padding] duration-500 ease-out sm:-mx-6 sm:w-[calc(100%+3rem)] sm:px-6 lg:-mx-8 lg:w-[calc(100%+4rem)] lg:px-8 ${
+          navElevated ? "py-2.5 sm:py-3" : "py-3.5 sm:py-4"
+        }`}
       >
         <nav className="relative w-full max-w-6xl 2xl:max-w-7xl" aria-label="Primary navigation">
           <div
-            className={`flex w-full items-center justify-between rounded-full border px-4 py-3 backdrop-blur-2xl transition-all duration-500 sm:px-5 md:px-6 md:py-3.5 ${
+            className={`relative flex w-full items-center justify-between overflow-hidden rounded-full border px-4 py-3 backdrop-blur-2xl transition-all duration-700 ease-out sm:px-5 md:px-6 ${
               navElevated
-                ? "border-white/15 bg-[#101010]/80 shadow-[0_20px_90px_rgba(0,0,0,0.48),inset_0_1px_0_rgba(255,255,255,0.08)]"
-                : "border-white/10 bg-white/[0.045] shadow-[0_18px_70px_rgba(0,0,0,0.32)]"
+                ? "border-white/[0.16] bg-[#101010]/82 shadow-[0_22px_90px_rgba(0,0,0,0.52),inset_0_1px_0_rgba(255,255,255,0.09)] md:py-3"
+                : "border-white/10 bg-white/[0.04] shadow-[0_18px_70px_rgba(0,0,0,0.30),inset_0_1px_0_rgba(255,255,255,0.055)] md:py-3.5"
             }`}
           >
+            <div
+              aria-hidden="true"
+              className={`pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/28 to-transparent transition-opacity duration-700 ${
+                navElevated ? "opacity-75" : "opacity-45"
+              }`}
+            />
+            <div
+              aria-hidden="true"
+              className={`pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(124,58,237,0.11),transparent_42%)] transition-opacity duration-700 ${
+                navElevated ? "opacity-100" : "opacity-55"
+              }`}
+            />
             <a
               href="#"
-              className="flex min-h-10 items-center text-base font-semibold text-white transition-opacity duration-300 hover:opacity-80 md:text-lg"
+              data-cursor="link"
+              className="relative z-10 flex min-h-10 items-center text-base font-semibold text-white transition-opacity duration-300 hover:opacity-85 md:text-lg"
               aria-label="Growframe home"
             >
               <Image
@@ -373,22 +607,26 @@ export default function Home() {
               <span className="md:hidden">Growframe</span>
             </a>
 
-            <div className="hidden items-center gap-1 rounded-full border border-white/10 bg-black/20 p-1 text-sm font-medium text-zinc-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] md:flex">
+            <div className="relative z-10 hidden items-center gap-1 rounded-full border border-white/10 bg-black/22 p-1 text-sm font-medium text-zinc-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] md:flex">
               {navLinks.map((link) => (
-                <a
+                <motion.a
                   key={link.href}
                   href={link.href}
-                  className="rounded-full px-4 py-2 transition-all duration-500 ease-out hover:bg-white/[0.07] hover:text-white hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+                  data-cursor="link"
+                  whileHover={shouldReduceMotion ? undefined : { y: -1 }}
+                  transition={{ duration: 0.28, ease: smoothEase }}
+                  className="group relative rounded-full px-4 py-2 transition-all duration-500 ease-out hover:bg-white/[0.065] hover:text-white hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
                 >
-                  {link.label}
-                </a>
+                  <span className="relative z-10">{link.label}</span>
+                  <span className="absolute inset-x-4 bottom-1.5 h-px scale-x-0 bg-gradient-to-r from-transparent via-[#A78BFA]/70 to-transparent opacity-0 transition-all duration-500 ease-out group-hover:scale-x-100 group-hover:opacity-100" />
+                </motion.a>
               ))}
             </div>
 
-            <div className="hidden items-center md:flex">
+            <div className="relative z-10 hidden items-center md:flex">
               <MagneticButton
                 href="#contact"
-                className="min-h-10 rounded-full border border-white/10 bg-white/10 px-5 py-2 text-sm font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition-all duration-500 ease-out hover:-translate-y-0.5 hover:border-[#7C3AED]/50 hover:bg-[#7C3AED]/20 hover:shadow-[0_16px_50px_rgba(124,58,237,0.24),inset_0_1px_0_rgba(255,255,255,0.16)] active:translate-y-0 active:scale-[0.98]"
+                className="min-h-10 rounded-full border border-white/[0.12] bg-white/[0.095] px-5 py-2 text-sm font-medium text-white shadow-[0_10px_36px_rgba(0,0,0,0.26),inset_0_1px_0_rgba(255,255,255,0.13)] transition-all duration-500 ease-out hover:-translate-y-0.5 hover:border-[#7C3AED]/50 hover:bg-[#7C3AED]/20 hover:shadow-[0_16px_52px_rgba(124,58,237,0.26),inset_0_1px_0_rgba(255,255,255,0.18)] active:translate-y-0 active:scale-[0.98]"
               >
                 Contact
               </MagneticButton>
@@ -396,10 +634,11 @@ export default function Home() {
 
             <button
               type="button"
+              data-cursor="button"
               aria-label={mobileNavOpen ? "Close navigation menu" : "Open navigation menu"}
               aria-expanded={mobileNavOpen}
               onClick={() => setMobileNavOpen((open) => !open)}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-500 ease-out hover:border-white/20 hover:bg-white/[0.14] active:scale-95 md:hidden"
+              className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-500 ease-out hover:border-white/20 hover:bg-white/[0.14] active:scale-95 md:hidden"
             >
               <span className="relative h-3.5 w-4">
                 <span
@@ -419,31 +658,54 @@ export default function Home() {
           <AnimatePresence>
             {mobileNavOpen && (
               <motion.div
-                initial={{ opacity: 0, y: -8, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, scale: 0.98 }}
-                transition={{ duration: 0.28, ease: smoothEase }}
-                className="absolute left-0 right-0 top-[calc(100%+0.5rem)] overflow-hidden rounded-lg border border-white/10 bg-[#101010]/90 p-2 shadow-[0_28px_90px_rgba(0,0,0,0.52),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-2xl md:hidden"
+                initial={
+                  shouldReduceMotion
+                    ? { opacity: 0 }
+                    : { opacity: 0, y: -10, scale: 0.985, filter: "blur(8px)" }
+                }
+                animate={
+                  shouldReduceMotion
+                    ? { opacity: 1 }
+                    : { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }
+                }
+                exit={
+                  shouldReduceMotion
+                    ? { opacity: 0 }
+                    : { opacity: 0, y: -10, scale: 0.985, filter: "blur(8px)" }
+                }
+                transition={{ duration: 0.34, ease: smoothEase }}
+                className="absolute left-0 right-0 top-[calc(100%+0.55rem)] overflow-hidden rounded-lg border border-white/10 bg-[#101010]/92 p-2 shadow-[0_30px_96px_rgba(0,0,0,0.56),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-2xl md:hidden"
               >
-                <div className="grid gap-1">
+                <div aria-hidden="true" className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/24 to-transparent" />
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  exit="hidden"
+                  variants={revealContainer(0.045, 0.03)}
+                  className="relative grid gap-1"
+                >
                   {navLinks.map((link) => (
-                    <a
+                    <motion.a
                       key={link.href}
                       href={link.href}
+                      data-cursor="link"
                       onClick={() => setMobileNavOpen(false)}
+                      variants={shouldReduceMotion ? reducedFadeUp : cinematicFadeUp}
                       className="rounded-lg px-4 py-3 text-sm font-medium text-zinc-300 transition-all duration-300 hover:bg-white/[0.06] hover:text-white active:scale-[0.99]"
                     >
                       {link.label}
-                    </a>
+                    </motion.a>
                   ))}
-                  <a
+                  <motion.a
                     href="#contact"
+                    data-cursor="button"
                     onClick={() => setMobileNavOpen(false)}
-                    className="mt-1 rounded-lg border border-white/10 bg-white/[0.06] px-4 py-3 text-sm font-medium text-white transition-all duration-300 hover:border-[#7C3AED]/40 hover:bg-[#7C3AED]/15 active:scale-[0.99]"
+                    variants={shouldReduceMotion ? reducedFadeUp : cinematicFadeUp}
+                    className="mt-1 rounded-lg border border-white/10 bg-white/[0.06] px-4 py-3 text-sm font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-300 hover:border-[#7C3AED]/40 hover:bg-[#7C3AED]/15 active:scale-[0.99]"
                   >
                     Contact
-                  </a>
-                </div>
+                  </motion.a>
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -597,14 +859,10 @@ export default function Home() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             {services.map((service, index) => (
-              <motion.article
+              <PremiumCard
                 key={service.title}
-                variants={fadeUp}
-                whileHover={cardHover}
-                transition={{ duration: 0.32, ease: smoothEase }}
                 className="group relative min-h-56 overflow-hidden rounded-lg border border-white/10 bg-white/[0.035] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.24)] backdrop-blur-xl transition-colors duration-500 ease-out hover:border-white/20 hover:bg-white/[0.055] hover:shadow-[0_34px_110px_rgba(0,0,0,0.38)] sm:min-h-64 sm:p-6"
               >
-                <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_50%_0%,rgba(124,58,237,0.12),transparent_46%)]" />
                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-60" />
                 <div className="relative flex h-full flex-col justify-between gap-8 sm:gap-10">
                   <div>
@@ -620,7 +878,7 @@ export default function Home() {
                     {service.description}
                   </p>
                 </div>
-              </motion.article>
+              </PremiumCard>
             ))}
           </div>
         </ScrollReveal>
@@ -656,11 +914,8 @@ export default function Home() {
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {portfolioProjects.map((project, index) => (
-              <motion.article
+              <PremiumCard
                 key={project.title}
-                variants={fadeUp}
-                whileHover={cardHover}
-                transition={{ duration: 0.32, ease: smoothEase }}
                 className="group relative overflow-hidden rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-[0_28px_90px_rgba(0,0,0,0.28)] backdrop-blur-xl transition-colors duration-500 ease-out hover:border-white/20 hover:bg-white/[0.055] hover:shadow-[0_38px_130px_rgba(0,0,0,0.44)]"
               >
                 <div className="relative aspect-[16/10] overflow-hidden rounded-lg border border-white/10 bg-[#101010] sm:aspect-[16/11]">
@@ -689,7 +944,7 @@ export default function Home() {
                     {project.description}
                   </p>
                 </div>
-              </motion.article>
+              </PremiumCard>
             ))}
           </div>
         </ScrollReveal>
@@ -726,14 +981,10 @@ export default function Home() {
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {processSteps.map((step, index) => (
-                <motion.article
+                <PremiumCard
                   key={step.title}
-                  variants={fadeUp}
-                  whileHover={cardHover}
-                  transition={{ duration: 0.32, ease: smoothEase }}
                   className="group relative overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-colors duration-500 ease-out hover:border-white/20 hover:bg-white/[0.05] hover:shadow-[0_34px_110px_rgba(0,0,0,0.38)] sm:p-6"
                 >
-                  <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_20%_0%,rgba(124,58,237,0.1),transparent_42%)]" />
                   <div className="relative z-10 mb-8 flex items-center justify-between sm:mb-10">
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-[#111111]/90 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-colors duration-500 group-hover:border-[#7C3AED]/40 sm:h-16 sm:w-16">
                       0{index + 1}
@@ -747,7 +998,7 @@ export default function Home() {
                   <p className="relative mt-4 text-sm leading-6 text-zinc-400 transition-colors duration-500 group-hover:text-zinc-300 sm:mt-5 sm:leading-7">
                     {step.description}
                   </p>
-                </motion.article>
+                </PremiumCard>
               ))}
             </div>
           </div>
@@ -967,16 +1218,16 @@ export default function Home() {
                 aria-label="Footer navigation"
                 className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-zinc-400 sm:flex sm:flex-col sm:gap-1"
               >
-                <a href="#services" className="py-1.5 transition-colors duration-500 ease-out hover:text-white">
+                <a href="#services" data-cursor="link" className="py-1.5 transition-colors duration-500 ease-out hover:text-white">
                   Services
                 </a>
-                <a href="#portfolio" className="py-1.5 transition-colors duration-500 ease-out hover:text-white">
+                <a href="#portfolio" data-cursor="link" className="py-1.5 transition-colors duration-500 ease-out hover:text-white">
                   Portfolio
                 </a>
-                <a href="#process" className="py-1.5 transition-colors duration-500 ease-out hover:text-white">
+                <a href="#process" data-cursor="link" className="py-1.5 transition-colors duration-500 ease-out hover:text-white">
                   Process
                 </a>
-                <a href="#contact" className="py-1.5 transition-colors duration-500 ease-out hover:text-white">
+                <a href="#contact" data-cursor="link" className="py-1.5 transition-colors duration-500 ease-out hover:text-white">
                   Contact
                 </a>
               </motion.nav>
@@ -984,12 +1235,14 @@ export default function Home() {
               <motion.div variants={fadeUp} className="space-y-3 text-sm text-zinc-400">
                 <a
                   href="https://instagram.com/growframe"
+                  data-cursor="link"
                   className="block py-1.5 transition-colors duration-500 ease-out hover:text-white"
                 >
                   Instagram
                 </a>
                 <a
                   href="mailto:hello@growframe.co"
+                  data-cursor="link"
                   className="block py-1.5 transition-colors duration-500 ease-out hover:text-white"
                 >
                   hello@growframe.co
