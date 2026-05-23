@@ -7,7 +7,7 @@ import {
   type Variants,
 } from "framer-motion";
 import Image from "next/image";
-import type { ReactNode } from "react";
+import type { ChangeEvent, FormEvent, ReactNode } from "react";
 import { useState } from "react";
 
 const smoothEase = [0.22, 1, 0.36, 1] as const;
@@ -40,6 +40,14 @@ const navLinks = [
   { label: "Portfolio", href: "#portfolio" },
   { label: "Process", href: "#process" },
 ];
+
+const initialContactForm = {
+  fullName: "",
+  email: "",
+  niche: "",
+  subscriberCount: "",
+  message: "",
+};
 
 function ScrollReveal({
   children,
@@ -137,6 +145,11 @@ const processSteps = [
 export default function Home() {
   const [navElevated, setNavElevated] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [contactForm, setContactForm] = useState(initialContactForm);
+  const [contactStatus, setContactStatus] = useState<
+    "idle" | "submitting" | "success" | "error"
+  >("idle");
+  const [contactError, setContactError] = useState("");
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
@@ -146,6 +159,89 @@ export default function Home() {
       setMobileNavOpen(false);
     }
   });
+
+  const updateContactField =
+    (field: keyof typeof initialContactForm) =>
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setContactForm((current) => ({
+        ...current,
+        [field]: event.target.value,
+      }));
+
+      if (contactStatus !== "idle") {
+        setContactStatus("idle");
+        setContactError("");
+      }
+    };
+
+  const validateContactForm = () => {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (contactForm.fullName.trim().length < 2) {
+      return "Enter your full name.";
+    }
+
+    if (!emailPattern.test(contactForm.email.trim())) {
+      return "Enter a valid email address.";
+    }
+
+    if (contactForm.niche.trim().length < 2) {
+      return "Tell us your creator niche.";
+    }
+
+    if (contactForm.subscriberCount.trim().length < 1) {
+      return "Add your current subscriber count.";
+    }
+
+    if (contactForm.message.trim().length < 20) {
+      return "Share a little more about your goals.";
+    }
+
+    return null;
+  };
+
+  const handleContactSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const validationError = validateContactForm();
+
+    if (validationError) {
+      setContactStatus("error");
+      setContactError(validationError);
+      return;
+    }
+
+    setContactStatus("submitting");
+    setContactError("");
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(contactForm),
+      });
+
+      const result = (await response.json().catch(() => null)) as
+        | { error?: string }
+        | null;
+
+      if (!response.ok) {
+        throw new Error(result?.error ?? "Something went wrong.");
+      }
+
+      setContactStatus("success");
+      setContactForm(initialContactForm);
+    } catch (error) {
+      setContactStatus("error");
+      setContactError(
+        error instanceof Error
+          ? error.message
+          : "Unable to send your inquiry right now.",
+      );
+    }
+  };
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#0A0A0A] px-4 text-[#F5F5F5] selection:bg-[#7C3AED]/35 sm:px-6 lg:px-8">
@@ -201,7 +297,7 @@ export default function Home() {
 
             <div className="hidden items-center md:flex">
               <a
-                href="mailto:hello@growframe.co"
+                href="#contact"
                 className="min-h-10 rounded-full border border-white/10 bg-white/10 px-5 py-2 text-sm font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition-all duration-500 ease-out hover:-translate-y-0.5 hover:border-[#7C3AED]/50 hover:bg-[#7C3AED]/20 hover:shadow-[0_16px_50px_rgba(124,58,237,0.24),inset_0_1px_0_rgba(255,255,255,0.16)] active:translate-y-0 active:scale-[0.98]"
               >
                 Contact
@@ -251,7 +347,7 @@ export default function Home() {
                     </a>
                   ))}
                   <a
-                    href="mailto:hello@growframe.co"
+                    href="#contact"
                     onClick={() => setMobileNavOpen(false)}
                     className="mt-1 rounded-lg border border-white/10 bg-white/[0.06] px-4 py-3 text-sm font-medium text-white transition-all duration-300 hover:border-[#7C3AED]/40 hover:bg-[#7C3AED]/15 active:scale-[0.99]"
                   >
@@ -574,6 +670,153 @@ export default function Home() {
         </ScrollReveal>
       </section>
 
+      <section id="contact" className="relative z-10 mx-auto w-full max-w-6xl py-20 sm:py-24 lg:py-32 2xl:max-w-7xl">
+        <ScrollReveal
+          amount={0.25}
+          stagger={0.1}
+          className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16"
+        >
+          <div className="max-w-xl lg:pt-4">
+            <motion.p
+              variants={fadeUp}
+              className="mb-4 text-[11px] font-medium uppercase tracking-[0.32em] text-zinc-500 sm:mb-5 sm:text-xs sm:tracking-[0.34em]"
+            >
+              Contact
+            </motion.p>
+
+            <motion.h2
+              variants={fadeUp}
+              className="text-3xl font-semibold leading-tight tracking-normal text-white sm:text-4xl md:text-5xl"
+            >
+              Tell us what you are building next.
+            </motion.h2>
+
+            <motion.p
+              variants={fadeUp}
+              className="mt-5 text-base leading-7 text-zinc-400 sm:mt-6 sm:leading-8 md:text-lg"
+            >
+              Share the signal behind your channel, where you want to go, and
+              what needs to improve. We will review the fit and respond with a
+              clear next step.
+            </motion.p>
+
+            <motion.div
+              variants={fadeUp}
+              className="mt-8 rounded-lg border border-white/10 bg-white/[0.03] p-5 text-sm leading-7 text-zinc-500 shadow-[0_24px_80px_rgba(0,0,0,0.22)] backdrop-blur-xl"
+            >
+              Serious creator inquiries only. No spam funnels, no bloated
+              discovery process.
+            </motion.div>
+          </div>
+
+          <motion.form
+            variants={fadeUp}
+            onSubmit={handleContactSubmit}
+            className="relative overflow-hidden rounded-lg border border-white/10 bg-white/[0.035] p-4 shadow-[0_34px_120px_rgba(0,0,0,0.38)] backdrop-blur-2xl sm:p-6"
+          >
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_0%,rgba(124,58,237,0.12),transparent_46%)]" />
+            <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+
+            <div className="relative grid gap-4 sm:grid-cols-2">
+              <label className="group block">
+                <span className="mb-2 block text-xs font-medium uppercase tracking-[0.24em] text-zinc-500">
+                  Full name
+                </span>
+                <input
+                  name="fullName"
+                  value={contactForm.fullName}
+                  onChange={updateContactField("fullName")}
+                  autoComplete="name"
+                  placeholder="Your name"
+                  className="min-h-12 w-full rounded-lg border border-white/10 bg-[#0F0F0F]/80 px-4 text-sm text-white outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-300 placeholder:text-zinc-700 focus:border-[#7C3AED]/45 focus:bg-[#111111] focus:shadow-[0_0_0_3px_rgba(124,58,237,0.12),inset_0_1px_0_rgba(255,255,255,0.08)]"
+                />
+              </label>
+
+              <label className="group block">
+                <span className="mb-2 block text-xs font-medium uppercase tracking-[0.24em] text-zinc-500">
+                  Email
+                </span>
+                <input
+                  name="email"
+                  type="email"
+                  value={contactForm.email}
+                  onChange={updateContactField("email")}
+                  autoComplete="email"
+                  placeholder="you@studio.com"
+                  className="min-h-12 w-full rounded-lg border border-white/10 bg-[#0F0F0F]/80 px-4 text-sm text-white outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-300 placeholder:text-zinc-700 focus:border-[#7C3AED]/45 focus:bg-[#111111] focus:shadow-[0_0_0_3px_rgba(124,58,237,0.12),inset_0_1px_0_rgba(255,255,255,0.08)]"
+                />
+              </label>
+
+              <label className="group block">
+                <span className="mb-2 block text-xs font-medium uppercase tracking-[0.24em] text-zinc-500">
+                  Creator niche
+                </span>
+                <input
+                  name="niche"
+                  value={contactForm.niche}
+                  onChange={updateContactField("niche")}
+                  placeholder="Tech, finance, fitness..."
+                  className="min-h-12 w-full rounded-lg border border-white/10 bg-[#0F0F0F]/80 px-4 text-sm text-white outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-300 placeholder:text-zinc-700 focus:border-[#7C3AED]/45 focus:bg-[#111111] focus:shadow-[0_0_0_3px_rgba(124,58,237,0.12),inset_0_1px_0_rgba(255,255,255,0.08)]"
+                />
+              </label>
+
+              <label className="group block">
+                <span className="mb-2 block text-xs font-medium uppercase tracking-[0.24em] text-zinc-500">
+                  Subscriber count
+                </span>
+                <input
+                  name="subscriberCount"
+                  value={contactForm.subscriberCount}
+                  onChange={updateContactField("subscriberCount")}
+                  placeholder="25k, 100k, 1M..."
+                  className="min-h-12 w-full rounded-lg border border-white/10 bg-[#0F0F0F]/80 px-4 text-sm text-white outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-300 placeholder:text-zinc-700 focus:border-[#7C3AED]/45 focus:bg-[#111111] focus:shadow-[0_0_0_3px_rgba(124,58,237,0.12),inset_0_1px_0_rgba(255,255,255,0.08)]"
+                />
+              </label>
+
+              <label className="group block sm:col-span-2">
+                <span className="mb-2 block text-xs font-medium uppercase tracking-[0.24em] text-zinc-500">
+                  Project goals
+                </span>
+                <textarea
+                  name="message"
+                  value={contactForm.message}
+                  onChange={updateContactField("message")}
+                  placeholder="What are you trying to improve, launch, or scale?"
+                  rows={6}
+                  className="w-full resize-none rounded-lg border border-white/10 bg-[#0F0F0F]/80 px-4 py-4 text-sm leading-7 text-white outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-300 placeholder:text-zinc-700 focus:border-[#7C3AED]/45 focus:bg-[#111111] focus:shadow-[0_0_0_3px_rgba(124,58,237,0.12),inset_0_1px_0_rgba(255,255,255,0.08)]"
+                />
+              </label>
+            </div>
+
+            <div className="relative mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-h-6 text-sm">
+                {contactStatus === "success" && (
+                  <p className="text-[#A78BFA]">
+                    Inquiry sent. We will review it and reply shortly.
+                  </p>
+                )}
+                {contactStatus === "error" && (
+                  <p className="text-red-300">{contactError}</p>
+                )}
+              </div>
+
+              <motion.button
+                type="submit"
+                disabled={contactStatus === "submitting"}
+                whileHover={contactStatus === "submitting" ? undefined : tactileHover}
+                whileTap={contactStatus === "submitting" ? undefined : tactileTap}
+                transition={{ duration: 0.28, ease: smoothEase }}
+                className="min-h-12 w-full rounded-full bg-[#7C3AED] px-8 py-4 text-sm font-semibold text-white shadow-[0_22px_80px_rgba(124,58,237,0.36),inset_0_1px_0_rgba(255,255,255,0.16)] transition-all duration-500 ease-out hover:bg-[#8B5CF6] hover:shadow-[0_30px_110px_rgba(124,58,237,0.46),inset_0_1px_0_rgba(255,255,255,0.2)] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+              >
+                {contactStatus === "submitting"
+                  ? "Sending inquiry..."
+                  : "Send Inquiry"}
+              </motion.button>
+            </div>
+          </motion.form>
+        </ScrollReveal>
+      </section>
+
       <section className="relative z-10 mx-auto w-full max-w-6xl pb-20 pt-12 sm:pb-24 sm:pt-16 lg:pb-32 lg:pt-24 2xl:max-w-7xl">
         <ScrollReveal
           amount={0.35}
@@ -610,14 +853,15 @@ export default function Home() {
               variants={fadeUp}
               className="mt-9 flex flex-col items-center justify-center gap-4 sm:mt-10"
             >
-              <motion.button
+              <motion.a
+                href="#contact"
                 whileHover={tactileHover}
                 whileTap={tactileTap}
                 transition={{ duration: 0.28, ease: smoothEase }}
-                className="min-h-12 w-full rounded-full bg-[#7C3AED] px-8 py-4 text-sm font-semibold text-white shadow-[0_22px_80px_rgba(124,58,237,0.38),inset_0_1px_0_rgba(255,255,255,0.16)] transition-shadow duration-500 ease-out hover:bg-[#8B5CF6] hover:shadow-[0_30px_110px_rgba(124,58,237,0.5),inset_0_1px_0_rgba(255,255,255,0.2)] sm:w-auto"
+                className="flex min-h-12 w-full items-center justify-center rounded-full bg-[#7C3AED] px-8 py-4 text-sm font-semibold text-white shadow-[0_22px_80px_rgba(124,58,237,0.38),inset_0_1px_0_rgba(255,255,255,0.16)] transition-shadow duration-500 ease-out hover:bg-[#8B5CF6] hover:shadow-[0_30px_110px_rgba(124,58,237,0.5),inset_0_1px_0_rgba(255,255,255,0.2)] sm:w-auto"
               >
                 Book a Free Strategy Call
-              </motion.button>
+              </motion.a>
 
               <p className="max-w-sm text-sm leading-6 text-zinc-500">
                 For creators ready to build with more clarity, consistency, and
@@ -654,7 +898,7 @@ export default function Home() {
                 <a href="#process" className="py-1.5 transition-colors duration-500 ease-out hover:text-white">
                   Process
                 </a>
-                <a href="mailto:hello@growframe.co" className="py-1.5 transition-colors duration-500 ease-out hover:text-white">
+                <a href="#contact" className="py-1.5 transition-colors duration-500 ease-out hover:text-white">
                   Contact
                 </a>
               </motion.nav>
