@@ -103,6 +103,50 @@ export default function RootLayout({
           gtag('config', '${googleAnalyticsId}');
         `}
       </Script>
+      <Script id="jsonld-organization" type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Growframe",
+          url: siteUrl,
+          logo: `${siteUrl}/growframe-mark.svg`,
+          email: "growframe.agency@gmail.com",
+          sameAs: [
+            "https://instagram.com/growframe",
+            "https://youtube.com/growframe",
+            "https://www.linkedin.com/company/growframe",
+            "https://x.com/growframe",
+          ],
+        })}
+      </Script>
+
+      <Script id="jsonld-professionalservice" type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ProfessionalService",
+          name: "Growframe",
+          url: siteUrl,
+          logo: `${siteUrl}/growframe-mark.svg`,
+          description,
+          email: "growframe.agency@gmail.com",
+          areaServed: "Worldwide",
+          serviceType: ["Video Editing", "Content Strategy", "Thumbnail Design", "Short-form Scaling"],
+        })}
+      </Script>
+
+      <Script id="jsonld-website" type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Growframe",
+          url: siteUrl,
+          potentialAction: {
+            "@type": "SearchAction",
+            target: `${siteUrl}/?s={search_term_string}`,
+            "query-input": "required name=search_term_string",
+          },
+        })}
+      </Script>
     </html>
   );
 }

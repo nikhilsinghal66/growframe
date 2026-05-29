@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Sitemap: https://growframe.co/sitemap.xml
+# Crawl-delay can be added for gentler crawling if needed
+# Crawl-delay: 10

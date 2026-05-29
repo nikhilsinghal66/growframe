@@ -2035,7 +2035,93 @@ export default function Home() {
         </ScrollReveal>
       </section>
 
-      <section className="relative z-10 mx-auto w-full max-w-6xl pb-20 pt-12 sm:pb-24 sm:pt-16 lg:pb-32 lg:pt-24 2xl:max-w-7xl">
+      <section id="faq" className="relative z-10 mx-auto w-full max-w-6xl py-16 sm:py-20 lg:py-24 2xl:max-w-7xl">
+        <ScrollReveal amount={0.25} className="mx-auto">
+          <div className="mx-auto mb-8 max-w-3xl text-center">
+            <motion.p variants={fadeUp} className="mb-3 text-[11px] font-medium uppercase tracking-[0.32em] text-zinc-500 sm:text-xs sm:tracking-[0.34em]">
+              Frequently Asked
+            </motion.p>
+
+            <motion.h2 variants={fadeUp} className="text-3xl font-semibold leading-tight tracking-normal text-white sm:text-4xl md:text-5xl">
+              Questions creators ask most often
+            </motion.h2>
+
+            <motion.p variants={fadeUp} className="mx-auto mt-4 max-w-2xl text-base leading-7 text-zinc-400 sm:mt-5 sm:leading-8">
+              Quick, practical answers to help you understand how Growframe partners with creators to build sustainable momentum.
+            </motion.p>
+          </div>
+
+          <motion.div variants={revealContainer(0.08, 0.06)} className="grid gap-6 sm:grid-cols-2">
+            <motion.dl variants={fadeUp} className="space-y-6">
+              <div>
+                <dt className="text-sm font-semibold text-white">How does Growframe help creators grow?</dt>
+                <dd className="mt-2 text-sm text-zinc-400">We build retention-first content systems: editing, thumbnails, and publishing pipelines that increase watch time, improve discoverability, and create reliable audience growth.</dd>
+              </div>
+
+              <div>
+                <dt className="text-sm font-semibold text-white">What services does Growframe provide?</dt>
+                <dd className="mt-2 text-sm text-zinc-400">Video editing, thumbnail design, content strategy, short-form scaling, and end-to-end publishing systems tailored to each creator&#39;s goals.</dd>
+              </div>
+            </motion.dl>
+
+            <motion.dl variants={fadeUp} className="space-y-6">
+              <div>
+                <dt className="text-sm font-semibold text-white">How long does a project take?</dt>
+                <dd className="mt-2 text-sm text-zinc-400">Typical timelines vary by scope; small edits can be delivered within a week while full channel systems and scaling packages usually take 6–12 weeks to implement and optimize.</dd>
+              </div>
+
+              <div>
+                <dt className="text-sm font-semibold text-white">Do you work with YouTubers and personal brands?</dt>
+                <dd className="mt-2 text-sm text-zinc-400">Yes. We partner with creators across long-form YouTube, personal brands, podcasts, and educational channels to build sustainable content engines.</dd>
+              </div>
+
+              <div>
+                <dt className="text-sm font-semibold text-white">How do I get started?</dt>
+                <dd className="mt-2 text-sm text-zinc-400">Start by booking a quick strategy call or sending a brief via growframe.agency@gmail.com. We review fit, provide an audit, and recommend a clear next step within 24 hours.</dd>
+              </div>
+            </motion.dl>
+          </motion.div>
+
+          {/* FAQ JSON-LD for search engines */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                mainEntity: [
+                  {
+                    "@type": "Question",
+                    name: "How does Growframe help creators grow?",
+                    acceptedAnswer: { "@type": "Answer", text: "We build retention-first content systems: editing, thumbnails, and publishing pipelines that increase watch time, improve discoverability, and create reliable audience growth." },
+                  },
+                  {
+                    "@type": "Question",
+                    name: "What services does Growframe provide?",
+                    acceptedAnswer: { "@type": "Answer", text: "Video editing, thumbnail design, content strategy, short-form scaling, and end-to-end publishing systems tailored to each creator's goals." },
+                  },
+                  {
+                    "@type": "Question",
+                    name: "How long does a project take?",
+                    acceptedAnswer: { "@type": "Answer", text: "Typical timelines vary by scope; small edits can be delivered within a week while full channel systems and scaling packages usually take 6–12 weeks to implement and optimize." },
+                  },
+                  {
+                    "@type": "Question",
+                    name: "Do you work with YouTubers and personal brands?",
+                    acceptedAnswer: { "@type": "Answer", text: "Yes. We partner with creators across long-form YouTube, personal brands, podcasts, and educational channels to build sustainable content engines." },
+                  },
+                  {
+                    "@type": "Question",
+                    name: "How do I get started?",
+                    acceptedAnswer: { "@type": "Answer", text: "Start by booking a quick strategy call or sending a brief via growframe.agency@gmail.com. We review fit, provide an audit, and recommend a clear next step within 24 hours." },
+                  },
+                ],
+              }),
+            }}
+          />
+        </ScrollReveal>
+      </section>
+        <section className="relative z-10 mx-auto w-full max-w-6xl pb-20 pt-12 sm:pb-24 sm:pt-16 lg:pb-32 lg:pt-24 2xl:max-w-7xl">
         <ScrollReveal
           amount={0.35}
           className="relative overflow-hidden rounded-lg border border-white/10 bg-white/[0.035] px-5 py-14 text-center shadow-[0_40px_140px_rgba(0,0,0,0.42)] backdrop-blur-2xl sm:px-6 sm:py-16 md:px-12 md:py-24"
