@@ -974,6 +974,146 @@ function CaseStudyCard({ caseStudy }: { caseStudy: CaseStudy }) {
   );
 }
 
+type VideoShowcase = {
+  category: string;
+  title: string;
+  description: string;
+  accent: string;
+  videoUrl?: string;
+};
+
+const videoShowcases: VideoShowcase[] = [
+  {
+    category: "Podcast Content",
+    title: "Podcast Editing",
+    description:
+      "Cinematic podcast clips with tight narrative arcs, clean transitions, and platform-specific pacing for multi-platform distribution.",
+    accent: "linear-gradient(135deg, rgba(59,130,246,0.95), rgba(124,58,237,0.65))",
+    videoUrl: undefined,
+  },
+  {
+    category: "Long-Form Video",
+    title: "YouTube Long Form",
+    description:
+      "Retention-optimized editing for 10-60 minute videos with strategic pacing, visual depth, and retention-tested thumbnail moments.",
+    accent: "linear-gradient(135deg, rgba(245,158,11,0.95), rgba(249,115,22,0.65))",
+    videoUrl: undefined,
+  },
+  {
+    category: "Short-Form Video",
+    title: "YouTube Shorts",
+    description:
+      "High-velocity short-form edits designed for immediate hook, consistent visual language, and algorithmic performance across platforms.",
+    accent: "linear-gradient(135deg, rgba(20,184,166,0.95), rgba(14,165,233,0.65))",
+    videoUrl: undefined,
+  },
+  {
+    category: "Social Media",
+    title: "Reels Editing",
+    description:
+      "Native Instagram Reels format with sound design, motion graphics, and engagement-optimized pacing for social-first audiences.",
+    accent: "linear-gradient(135deg, rgba(167,139,250,0.95), rgba(244,114,182,0.65))",
+    videoUrl: undefined,
+  },
+  {
+    category: "Technical Content",
+    title: "Tech Content",
+    description:
+      "Software walkthroughs and technical tutorials with clear screen recording, emphasis layers, and step-by-step narrative structure.",
+    accent: "linear-gradient(135deg, rgba(34,197,94,0.95), rgba(34,197,94,0.65))",
+    videoUrl: undefined,
+  },
+  {
+    category: "Educational Content",
+    title: "Educational Content",
+    description:
+      "Educational video production with strategic chapter breaks, infographics, and retention-first pacing for learning platforms.",
+    accent: "linear-gradient(135deg, rgba(236,72,153,0.95), rgba(168,85,247,0.65))",
+    videoUrl: undefined,
+  },
+];
+
+function VideoShowcaseCard({ showcase }: { showcase: VideoShowcase }) {
+  const shouldReduceMotion = useReducedMotion();
+
+  return (
+    <motion.li
+      role="listitem"
+      variants={shouldReduceMotion ? reducedFadeUp : cinematicFadeUp}
+      whileHover={shouldReduceMotion ? undefined : { y: -8, scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 220, damping: 22, mass: 0.55 }}
+      className="group relative overflow-hidden rounded-[1.75rem] border border-white/10 shadow-[0_32px_112px_rgba(0,0,0,0.42)]"
+    >
+      <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-[#111111]/92 via-[#0A0A0A]/80 to-[#080808]/95 backdrop-blur-2xl">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(124,58,237,0.15),transparent_28%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_42%,rgba(255,255,255,0.035))]"
+        />
+
+        {showcase.videoUrl ? (
+          <div className="relative h-full w-full overflow-hidden">
+            <video
+              src={showcase.videoUrl}
+              className="h-full w-full object-cover"
+              preload="metadata"
+              aria-label={`Video: ${showcase.title}`}
+            />
+          </div>
+        ) : (
+          <div
+            aria-hidden="true"
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(135deg, ${showcase.accent.split("(")[1].split(",")[0]}40, transparent)`,
+            }}
+          />
+        )}
+
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/80 via-transparent to-transparent" />
+
+        <div className="absolute inset-0 flex items-center justify-center">
+          <motion.div
+            whileHover={shouldReduceMotion ? undefined : { scale: 1.15 }}
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+            className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/40 bg-white/10 backdrop-blur-xl transition-all duration-300 group-hover:border-white/60 group-hover:bg-white/20"
+          >
+            <svg
+              className="h-6 w-6 text-white"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </motion.div>
+        </div>
+
+        <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end gap-3 p-4 sm:p-5">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.28em] text-white/60">
+              {showcase.category}
+            </p>
+            <p className="mt-1 text-lg font-semibold tracking-[-0.01em] text-white sm:text-xl">
+              {showcase.title}
+            </p>
+          </div>
+          <p className="text-xs leading-5 text-white/70 line-clamp-2">
+            {showcase.description}
+          </p>
+        </div>
+      </div>
+
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 bottom-0 h-px"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${showcase.accent.split("(")[1].split(",")[0]}80, transparent)`,
+        }}
+      />
+    </motion.li>
+  );
+}
+
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [preloaderFinished, setPreloaderFinished] = useState(false);
@@ -1523,6 +1663,43 @@ export default function Home() {
               </PremiumCard>
             ))}
           </div>
+        </ScrollReveal>
+      </section>
+
+      <section id="video-showcase" className="relative z-10 mx-auto w-full max-w-6xl py-20 sm:py-24 lg:py-32 2xl:max-w-7xl">
+        <ScrollReveal amount={0.25}>
+          <div className="mx-auto mb-12 max-w-3xl text-center sm:mb-14 md:mb-20">
+            <motion.p
+              variants={fadeUp}
+              className="mb-4 text-[11px] font-medium uppercase tracking-[0.32em] text-zinc-500 sm:mb-5 sm:text-xs sm:tracking-[0.34em]"
+            >
+              Video Showcase
+            </motion.p>
+
+            <motion.h2
+              variants={fadeUp}
+              className="text-3xl font-semibold leading-tight tracking-normal text-white sm:text-4xl md:text-5xl"
+            >
+              Sample work across content formats and niches.
+            </motion.h2>
+
+            <motion.p
+              variants={fadeUp}
+              className="mx-auto mt-5 max-w-2xl text-base leading-7 text-zinc-400 sm:mt-6 sm:leading-8"
+            >
+              A range of editing styles, pacing strategies, and platform-specific optimizations that show how we approach quality at scale.
+            </motion.p>
+          </div>
+
+          <motion.ul
+            role="list"
+            variants={revealContainer(0.1, 0.08)}
+            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {videoShowcases.map((showcase) => (
+              <VideoShowcaseCard key={showcase.title} showcase={showcase} />
+            ))}
+          </motion.ul>
         </ScrollReveal>
       </section>
 
