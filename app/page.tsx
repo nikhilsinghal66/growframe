@@ -798,6 +798,182 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   );
 }
 
+type CaseStudy = {
+  title: string;
+  category: string;
+  description: string;
+  before: {
+    metric1: string;
+    metric2: string;
+  };
+  after: {
+    metric1: string;
+    metric2: string;
+  };
+  accent: string;
+  icon: React.ReactNode;
+};
+
+const caseStudies: CaseStudy[] = [
+  {
+    title: "Tech Creator System",
+    category: "Content Pipeline",
+    description:
+      "Built a structured editing and publishing system for a technical creator scaling from 50K to 180K subscribers.",
+    before: {
+      metric1: "Inconsistent Uploads",
+      metric2: "42% Avg Watch Time",
+    },
+    after: {
+      metric1: "2-3 Videos/Week",
+      metric2: "68% Avg Watch Time",
+    },
+    accent: "linear-gradient(135deg, rgba(59,130,246,0.95), rgba(124,58,237,0.65))",
+    icon: (
+      <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+      </svg>
+    ),
+  },
+  {
+    title: "Podcast Growth Engine",
+    category: "Short-Form Scaling",
+    description:
+      "Transformed weekly podcast clips into a high-velocity short-form engine with tighter narrative arcs and platform-native packaging.",
+    before: {
+      metric1: "2K Avg Clip Views",
+      metric2: "Weak Retention",
+    },
+    after: {
+      metric1: "50K+ Avg Views",
+      metric2: "3x Reach Increase",
+    },
+    accent: "linear-gradient(135deg, rgba(245,158,11,0.95), rgba(249,115,22,0.65))",
+    icon: (
+      <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
+      </svg>
+    ),
+  },
+  {
+    title: "Education Brand Scale",
+    category: "Repeatable Systems",
+    description:
+      "Created a publishing and engagement system for an education brand that improved discoverability and turned sporadic uploads into consistent momentum.",
+    before: {
+      metric1: "Limited Discoverability",
+      metric2: "2% Engagement Rate",
+    },
+    after: {
+      metric1: "Repeatable Pipeline",
+      metric2: "8% Engagement Rate",
+    },
+    accent: "linear-gradient(135deg, rgba(20,184,166,0.95), rgba(14,165,233,0.65))",
+    icon: (
+      <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
+      </svg>
+    ),
+  },
+];
+
+function CaseStudyCard({ caseStudy }: { caseStudy: CaseStudy }) {
+  const shouldReduceMotion = useReducedMotion();
+
+  return (
+    <motion.li
+      role="listitem"
+      variants={shouldReduceMotion ? reducedFadeUp : cinematicFadeUp}
+      whileHover={shouldReduceMotion ? undefined : { y: -6, scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 220, damping: 22, mass: 0.55 }}
+      className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#111111]/92 via-[#0A0A0A]/80 to-[#080808]/95 p-6 shadow-[0_32px_112px_rgba(0,0,0,0.42)] backdrop-blur-2xl sm:p-7"
+    >
+      <div className="pointer-events-none absolute inset-0 rounded-[2rem] bg-[radial-gradient(circle_at_top_left,rgba(124,58,237,0.12),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.05),transparent)]" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full blur-3xl"
+        style={{ background: caseStudy.accent }}
+      />
+
+      <div className="relative z-10 flex flex-col gap-5 sm:gap-6">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.28em] text-zinc-500">
+              {caseStudy.category}
+            </p>
+            <h3 className="mt-2 text-xl font-semibold tracking-[-0.01em] text-white sm:text-2xl">
+              {caseStudy.title}
+            </h3>
+          </div>
+          <div
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-[#111111]/80 text-white/70 transition-all duration-300 group-hover:border-white/20 group-hover:bg-[#1a1a1a] group-hover:text-white"
+            style={{
+              background: `linear-gradient(135deg, transparent, rgba(124,58,237,0.1))`,
+              borderColor: "rgba(255,255,255,0.1)",
+            }}
+          >
+            {caseStudy.icon}
+          </div>
+        </div>
+
+        <p className="text-sm leading-6 text-zinc-300">
+          {caseStudy.description}
+        </p>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.035] p-3 sm:p-4">
+            <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.24em] text-zinc-500">
+              Before
+            </p>
+            <div className="space-y-1.5">
+              <p className="text-xs text-zinc-400">{caseStudy.before.metric1}</p>
+              <p className="text-xs text-zinc-400">{caseStudy.before.metric2}</p>
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.035] p-3 sm:p-4">
+            <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.24em] text-zinc-500">
+              After
+            </p>
+            <div className="space-y-1.5">
+              <p
+                className="text-xs font-semibold"
+                style={{
+                  background: caseStudy.accent,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                {caseStudy.after.metric1}
+              </p>
+              <p
+                className="text-xs font-semibold"
+                style={{
+                  background: caseStudy.accent,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                {caseStudy.after.metric2}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 bottom-0 h-px"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${caseStudy.accent}, transparent)`,
+        }}
+      />
+    </motion.li>
+  );
+}
+
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [preloaderFinished, setPreloaderFinished] = useState(false);
@@ -1438,6 +1614,43 @@ export default function Home() {
           >
             {testimonials.map((testimonial) => (
               <TestimonialCard key={testimonial.name} testimonial={testimonial} />
+            ))}
+          </motion.ul>
+        </ScrollReveal>
+      </section>
+
+      <section id="case-studies" className="relative z-10 mx-auto w-full max-w-6xl py-20 sm:py-24 lg:py-32 2xl:max-w-7xl">
+        <ScrollReveal amount={0.25}>
+          <div className="mx-auto mb-12 max-w-3xl text-center sm:mb-14 md:mb-20">
+            <motion.p
+              variants={fadeUp}
+              className="mb-4 text-[11px] font-medium uppercase tracking-[0.32em] text-zinc-500 sm:mb-5 sm:text-xs sm:tracking-[0.34em]"
+            >
+              Real Results
+            </motion.p>
+
+            <motion.h2
+              variants={fadeUp}
+              className="text-3xl font-semibold leading-tight tracking-normal text-white sm:text-4xl md:text-5xl"
+            >
+              Documented growth from before to after.
+            </motion.h2>
+
+            <motion.p
+              variants={fadeUp}
+              className="mx-auto mt-5 max-w-2xl text-base leading-7 text-zinc-400 sm:mt-6 sm:leading-8"
+            >
+              Three case studies showing the strategic work, content systems, and measurable results from creators we&apos;ve helped scale their channels and audience impact.
+            </motion.p>
+          </div>
+
+          <motion.ul
+            role="list"
+            variants={revealContainer(0.12, 0.08)}
+            className="grid gap-6 lg:grid-cols-3"
+          >
+            {caseStudies.map((caseStudy) => (
+              <CaseStudyCard key={caseStudy.title} caseStudy={caseStudy} />
             ))}
           </motion.ul>
         </ScrollReveal>
