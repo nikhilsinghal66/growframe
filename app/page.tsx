@@ -1840,35 +1840,94 @@ export default function Home() {
         >
           <div className="max-w-xl lg:pt-4">
             <motion.p
-              variants={fadeUp}
-              className="mb-4 text-[11px] font-medium uppercase tracking-[0.32em] text-zinc-500 sm:mb-5 sm:text-xs sm:tracking-[0.34em]"
-            >
-              Contact
-            </motion.p>
+                variants={fadeUp}
+                className="mb-4 text-[11px] font-medium uppercase tracking-[0.32em] text-zinc-500 sm:mb-5 sm:text-xs sm:tracking-[0.34em]"
+              >
+                Contact
+              </motion.p>
 
-            <motion.h2
-              variants={fadeUp}
-              className="text-3xl font-semibold leading-tight tracking-normal text-white sm:text-4xl md:text-5xl"
-            >
-              Tell us what you are building next.
-            </motion.h2>
+              <motion.h2
+                variants={fadeUp}
+                className="text-3xl font-semibold leading-tight tracking-normal text-white sm:text-4xl md:text-5xl"
+              >
+                Book a strategy session or send a targeted brief.
+              </motion.h2>
 
-            <motion.p
-              variants={fadeUp}
-              className="mt-5 text-base leading-7 text-zinc-400 sm:mt-6 sm:leading-8 md:text-lg"
-            >
-              Share the signal behind your channel, where you want to go, and
-              what needs to improve. We will review the fit and respond with a
-              clear next step.
-            </motion.p>
+              <motion.p
+                variants={fadeUp}
+                className="mt-4 text-base leading-7 text-zinc-400 sm:mt-5 sm:leading-8 md:text-lg"
+              >
+                Fast, founder-level feedback for creators ready to scale. Share your
+                channel signal, current bottlenecks, and a brief on your goals — we&apos;ll
+                respond within 24 hours with a clear next step.
+              </motion.p>
 
-            <motion.div
-              variants={fadeUp}
-              className="mt-8 rounded-lg border border-white/10 bg-white/[0.03] p-5 text-sm leading-7 text-zinc-500 shadow-[0_24px_80px_rgba(0,0,0,0.22)] backdrop-blur-xl"
-            >
-              Serious creator inquiries only. No spam funnels, no bloated
-              discovery process.
-            </motion.div>
+              <motion.div variants={fadeUp} className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+                <MagneticButton
+                  href="mailto:growframe.agency@gmail.com?subject=Book%20Strategy%20Call"
+                  className="min-h-12 w-full rounded-full bg-[#7C3AED] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_60px_rgba(124,58,237,0.34),inset_0_1px_0_rgba(255,255,255,0.16)] transition-shadow duration-500 ease-out hover:bg-[#8B5CF6] sm:w-auto"
+                  >
+                  Book a Strategy Call
+                </MagneticButton>
+
+                <MagneticButton
+                  href="mailto:growframe.agency@gmail.com?subject=Free%20Content%20Audit"
+                  className="min-h-12 w-full rounded-full border border-white/10 bg-white/[0.035] px-6 py-3 text-sm font-semibold text-zinc-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-xl transition-colors duration-500 ease-out hover:border-white/20 hover:bg-white/[0.07] hover:text-white sm:w-auto"
+                >
+                  Get a Free Content Audit
+                </MagneticButton>
+              </motion.div>
+
+              <motion.div variants={fadeUp} className="mt-4 flex items-center gap-4">
+                <MagneticButton
+                  href="mailto:growframe.agency@gmail.com?subject=Schedule%20Discovery%20Call"
+                  className="min-h-10 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium text-white/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-all duration-300 hover:border-white/20 hover:bg-white/[0.06]"
+                >
+                  Schedule a Discovery Call
+                </MagneticButton>
+
+                <div className="ml-3 text-sm text-zinc-400">
+                  Or email us directly at
+                  <a
+                    href="mailto:growframe.agency@gmail.com"
+                    className="ml-2 font-medium text-white underline-offset-4 hover:underline"
+                  >
+                    growframe.agency@gmail.com
+                  </a>
+                </div>
+              </motion.div>
+
+              <motion.div variants={fadeUp} className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="flex items-start gap-3">
+                  <div className="mt-1 h-9 w-9 shrink-0 rounded-full bg-[#111111]/80 p-2 text-center text-sm font-semibold text-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                    <svg className="h-5 w-5 text-white/70" viewBox="0 0 24 24" fill="none"><path d="M12 2v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-white">Reply within 24 hours</div>
+                    <div className="text-xs text-zinc-400">Fast, prioritized responses for vetted creators</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="mt-1 h-9 w-9 shrink-0 rounded-full bg-[#111111]/80 p-2 text-center text-sm font-semibold text-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                    <svg className="h-5 w-5 text-white/70" viewBox="0 0 24 24" fill="none"><path d="M3 12h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M3 6h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-white">Creator-focused expertise</div>
+                    <div className="text-xs text-zinc-400">Editing, thumbnails, and systems that scale channels</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="mt-1 h-9 w-9 shrink-0 rounded-full bg-[#111111]/80 p-2 text-center text-sm font-semibold text-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                    <svg className="h-5 w-5 text-white/70" viewBox="0 0 24 24" fill="none"><path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-white">Growth-focused</div>
+                    <div className="text-xs text-zinc-400">Systems & metrics aimed at sustainable audience growth</div>
+                  </div>
+                </div>
+              </motion.div>
           </div>
 
           <motion.form
