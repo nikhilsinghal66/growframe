@@ -569,6 +569,117 @@ function Preloader({ onComplete }: { onComplete: () => void }) {
   );
 }
 
+type Metric = {
+  value: string;
+  label: string;
+  description: string;
+  accent: string;
+};
+
+const premiumMetrics: Metric[] = [
+  {
+    value: "10M+",
+    label: "Views Generated",
+    description: "Content systems built for discoverability and high click-through performance.",
+    accent: "linear-gradient(90deg, rgba(124,58,237,0.95), rgba(59,130,246,0.7))",
+  },
+  {
+    value: "50+",
+    label: "Projects Delivered",
+    description: "End-to-end delivery for creators, brands, and launch campaigns.",
+    accent: "linear-gradient(90deg, rgba(245,158,11,0.95), rgba(244,63,94,0.7))",
+  },
+  {
+    value: "95%",
+    label: "Client Retention",
+    description: "Long-term partnerships through dependable execution and creative momentum.",
+    accent: "linear-gradient(90deg, rgba(20,184,166,0.95), rgba(59,130,246,0.65))",
+  },
+  {
+    value: "3x",
+    label: "Average Growth",
+    description: "Average account expansion for creators using our retention-led content engines.",
+    accent: "linear-gradient(90deg, rgba(167,139,250,0.95), rgba(244,114,182,0.65))",
+  },
+];
+
+function MetricCard({ metric }: { metric: Metric }) {
+  const shouldReduceMotion = useReducedMotion();
+  const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
+  const frameRef = useRef<number | null>(null);
+  const numericTarget = Number(metric.value.replace(/[^\d.]/g, ""));
+  const suffix = metric.value.replace(/[\d.]/g, "");
+
+  useEffect(() => {
+    if (!started) {
+      return;
+    }
+
+    if (shouldReduceMotion) {
+      frameRef.current = requestAnimationFrame(() => setCount(numericTarget));
+      return;
+    }
+
+    const duration = 1100;
+    const start = performance.now();
+
+    const tick = (timestamp: number) => {
+      const progress = Math.min((timestamp - start) / duration, 1);
+      setCount(Math.round(progress * numericTarget));
+
+      if (progress < 1) {
+        frameRef.current = requestAnimationFrame(tick);
+      }
+    };
+
+    frameRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      if (frameRef.current) {
+        cancelAnimationFrame(frameRef.current);
+      }
+    };
+  }, [started, numericTarget, shouldReduceMotion]);
+
+  return (
+    <motion.li
+      role="listitem"
+      variants={shouldReduceMotion ? reducedFadeUp : cinematicFadeUp}
+      whileHover={shouldReduceMotion ? undefined : { y: -4, scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 220, damping: 22, mass: 0.55 }}
+      onViewportEnter={() => setStarted(true)}
+      className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#111111]/92 via-[#0A0A0A]/80 to-[#080808]/95 p-6 shadow-[0_32px_112px_rgba(0,0,0,0.42)] backdrop-blur-2xl"
+    >
+      <div className="pointer-events-none absolute inset-0 rounded-[2rem] bg-[radial-gradient(circle_at_top_left,rgba(124,58,237,0.13),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.06),transparent)]" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute right-6 top-6 h-24 w-24 rounded-full blur-3xl"
+        style={{ background: metric.accent }}
+      />
+      <div className="relative z-10 flex h-full flex-col justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium uppercase tracking-[0.32em] text-zinc-500">
+            {metric.label}
+          </p>
+          <p className="mt-6 text-4xl font-semibold tracking-[-0.05em] text-white sm:text-5xl">
+            {count}
+            {suffix}
+          </p>
+        </div>
+        <p className="text-sm leading-6 text-zinc-400">
+          {metric.description}
+        </p>
+      </div>
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-6 bottom-6 h-1 rounded-full opacity-90"
+        style={{ background: metric.accent }}
+      />
+    </motion.li>
+  );
+}
+
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [preloaderFinished, setPreloaderFinished] = useState(false);
@@ -966,6 +1077,38 @@ export default function Home() {
           </motion.div>
         </motion.div>
       </motion.section>
+
+      <section id="social-proof" className="relative z-10 mx-auto w-full max-w-6xl py-20 sm:py-24 lg:py-32 2xl:max-w-7xl">
+        <ScrollReveal amount={0.35} className="grid gap-12">
+          <div className="max-w-3xl space-y-5">
+            <motion.p variants={fadeUp} className="text-[11px] font-medium uppercase tracking-[0.32em] text-zinc-500 sm:text-xs sm:tracking-[0.34em]">
+              Metrics & Social Proof
+            </motion.p>
+            <motion.h2
+              variants={fadeUp}
+              className="text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl"
+            >
+              Premium growth validated by view volume, delivery, and retention.
+            </motion.h2>
+            <motion.p
+              variants={fadeUp}
+              className="max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg"
+            >
+              Four key performance signals that demonstrate our luxury SaaS-grade approach to creator growth and content systems.
+            </motion.p>
+          </div>
+
+          <motion.ul
+            role="list"
+            variants={revealContainer(0.12, 0.08)}
+            className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4"
+          >
+            {premiumMetrics.map((metric) => (
+              <MetricCard key={metric.label} metric={metric} />
+            ))}
+          </motion.ul>
+        </ScrollReveal>
+      </section>
 
       <section id="services" className="relative z-10 mx-auto w-full max-w-6xl py-20 sm:py-24 lg:py-32 2xl:max-w-7xl">
         <ScrollReveal
