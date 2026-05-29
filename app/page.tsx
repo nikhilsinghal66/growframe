@@ -680,6 +680,124 @@ function MetricCard({ metric }: { metric: Metric }) {
   );
 }
 
+type Testimonial = {
+  quote: string;
+  name: string;
+  role: string;
+  category: string;
+  metric: string;
+  accent: string;
+};
+
+const testimonials: Testimonial[] = [
+  {
+    quote:
+      "Growframe transformed how I approach editing. Instead of chasing every trend, I now have a system that actually keeps viewers watching. My average watch time went from 42% to 68% within three months.",
+    name: "Sarah Chen",
+    role: "Tech Educator",
+    category: "Education Creator",
+    metric: "68% Avg Watch Time",
+    accent: "linear-gradient(135deg, rgba(59,130,246,0.95), rgba(124,58,237,0.65))",
+  },
+  {
+    quote:
+      "The content strategy they developed took our podcast clips from 2K average views to consistently hitting 50K+. What impressed me most was how they understood retention mechanics at scale without overcomplicating the process.",
+    name: "Marcus Rodriguez",
+    role: "Podcast Host",
+    category: "Podcast Creator",
+    metric: "50K+ Avg Views",
+    accent: "linear-gradient(135deg, rgba(245,158,11,0.95), rgba(249,115,22,0.65))",
+  },
+  {
+    quote:
+      "Working with Growframe felt like having a creative partner who actually understands growth metrics. My channel grew 3.4x in the first year, but more importantly, my audience quality improved dramatically. The thumbnails alone changed everything.",
+    name: "Jordan Mitchell",
+    role: "Personal Brand",
+    category: "Personal Brand Creator",
+    metric: "3.4x Growth",
+    accent: "linear-gradient(135deg, rgba(20,184,166,0.95), rgba(14,165,233,0.65))",
+  },
+  {
+    quote:
+      "They didn&apos;t just edit my videos&mdash;they built a repeatable system. Now my team can produce 4 high-quality videos per week without sacrificing quality. The editing systems they documented are pure gold for scaling operations.",
+    name: "Alex Thompson",
+    role: "Creator & Builder",
+    category: "Tech Creator",
+    metric: "4 Videos/Week",
+    accent: "linear-gradient(135deg, rgba(167,139,250,0.95), rgba(244,114,182,0.65))",
+  },
+];
+
+function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
+  const shouldReduceMotion = useReducedMotion();
+
+  return (
+    <motion.li
+      role="listitem"
+      variants={shouldReduceMotion ? reducedFadeUp : cinematicFadeUp}
+      whileHover={shouldReduceMotion ? undefined : { y: -6, scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 220, damping: 22, mass: 0.55 }}
+      className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#111111]/92 via-[#0A0A0A]/80 to-[#080808]/95 p-6 shadow-[0_32px_112px_rgba(0,0,0,0.42)] backdrop-blur-2xl sm:p-8"
+    >
+      <div className="pointer-events-none absolute inset-0 rounded-[2rem] bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.12),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.05),transparent)]" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full blur-3xl"
+        style={{ background: testimonial.accent }}
+      />
+      <div className="relative z-10 flex h-full flex-col justify-between gap-6">
+        <div>
+          <div className="mb-4 flex items-center gap-1">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <svg
+                key={i}
+                className="h-4 w-4 fill-amber-400"
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+              >
+                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+              </svg>
+            ))}
+          </div>
+          <blockquote className="text-base leading-7 text-zinc-200 sm:text-lg sm:leading-8">
+            &ldquo;{testimonial.quote}&rdquo;
+          </blockquote>
+        </div>
+
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="font-semibold text-white">{testimonial.name}</p>
+            <p className="text-sm text-zinc-400">{testimonial.role}</p>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <p className="text-xs font-medium uppercase tracking-[0.24em] text-zinc-500">
+              {testimonial.category}
+            </p>
+            <p
+              className="text-sm font-semibold"
+              style={{
+                background: testimonial.accent,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              {testimonial.metric}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 bottom-0 h-px"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${testimonial.accent}, transparent)`,
+        }}
+      />
+    </motion.li>
+  );
+}
+
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [preloaderFinished, setPreloaderFinished] = useState(false);
@@ -1284,6 +1402,44 @@ export default function Home() {
               ))}
             </div>
           </div>
+        </ScrollReveal>
+      </section>
+
+      <section id="testimonials" className="relative z-10 mx-auto w-full max-w-6xl py-20 sm:py-24 lg:py-32 2xl:max-w-7xl">
+        <ScrollReveal amount={0.25}>
+          <div className="mx-auto mb-12 max-w-3xl text-center sm:mb-14 md:mb-20">
+            <motion.p
+              variants={fadeUp}
+              className="mb-4 text-[11px] font-medium uppercase tracking-[0.32em] text-zinc-500 sm:mb-5 sm:text-xs sm:tracking-[0.34em]"
+            >
+              Creator Voices
+            </motion.p>
+
+            <motion.h2
+              variants={fadeUp}
+              className="text-3xl font-semibold leading-tight tracking-normal text-white sm:text-4xl md:text-5xl"
+            >
+              What creators say about working with Growframe.
+            </motion.h2>
+
+            <motion.p
+              variants={fadeUp}
+              className="mx-auto mt-5 max-w-2xl text-base leading-7 text-zinc-400 sm:mt-6 sm:leading-8"
+            >
+              Real feedback from creators across different niches who&apos;ve grown
+              their channels through our retention-first content systems.
+            </motion.p>
+          </div>
+
+          <motion.ul
+            role="list"
+            variants={revealContainer(0.1, 0.06)}
+            className="grid gap-5 sm:grid-cols-2 xl:grid-cols-2"
+          >
+            {testimonials.map((testimonial) => (
+              <TestimonialCard key={testimonial.name} testimonial={testimonial} />
+            ))}
+          </motion.ul>
         </ScrollReveal>
       </section>
 
