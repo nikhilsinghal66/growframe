@@ -14,7 +14,7 @@ import Image from "next/image";
 import type { ChangeEvent, FormEvent, PointerEvent, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
-const smoothEase = [0.22, 1, 0.36, 1] as const;
+const smoothEase = [0.16, 1, 0.3, 1] as const;
 
 const revealContainer = (stagger = 0.1, delay = 0): Variants => ({
   hidden: {},
@@ -27,12 +27,13 @@ const revealContainer = (stagger = 0.1, delay = 0): Variants => ({
 });
 
 const cinematicFadeUp: Variants = {
-  hidden: { opacity: 0, y: 18, filter: "blur(8px)" },
+  hidden: { opacity: 0, y: 12, filter: "blur(8px)", scale: 0.985 },
   visible: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
-    transition: { duration: 0.78, ease: smoothEase },
+    scale: 1,
+    transition: { duration: 0.76, ease: smoothEase },
   },
 };
 
@@ -88,8 +89,8 @@ const initialContactForm = {
 function ScrollReveal({
   children,
   className,
-  amount = 0.28,
-  stagger = 0.1,
+  amount = 0.25,
+  stagger = 0.08,
   delay = 0,
 }: {
   children: ReactNode;
@@ -104,7 +105,7 @@ function ScrollReveal({
     <motion.div
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount, margin: "0px 0px -8% 0px" }}
+      viewport={{ once: true, amount, margin: "0px 0px -10% 0px" }}
       variants={
         shouldReduceMotion ? revealContainer(0, 0) : revealContainer(stagger, delay)
       }
@@ -133,7 +134,13 @@ function Atmosphere() {
       };
 
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+    <motion.div
+      initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, filter: "blur(0px)" }}
+      transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 overflow-hidden"
+    >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-14%,rgba(124,58,237,0.20),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.045),transparent_16%,rgba(0,0,0,0.62)_88%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:72px_72px] opacity-[0.055] [mask-image:radial-gradient(ellipse_at_center,black_16%,transparent_74%)]" />
 
@@ -157,7 +164,7 @@ function Atmosphere() {
       <div className="absolute inset-x-0 top-[118rem] h-px bg-gradient-to-r from-transparent via-[#7C3AED]/18 to-transparent" />
       <div className="absolute inset-x-0 top-[196rem] h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 h-72 bg-gradient-to-t from-[#0A0A0A] to-transparent" />
-    </div>
+    </motion.div>
   );
 }
 
@@ -166,6 +173,7 @@ function CustomCursor() {
   const [enabled, setEnabled] = useState(false);
   const [cursorState, setCursorState] = useState<CursorState>("default");
   const [visible, setVisible] = useState(false);
+  const [isClicked, setIsClicked] = useState(false);
   const xValue = useMotionValue(-100);
   const yValue = useMotionValue(-100);
   const x = useSpring(xValue, { stiffness: 520, damping: 44, mass: 0.35 });
@@ -201,19 +209,27 @@ function CustomCursor() {
     };
 
     const handlePointerLeave = () => setVisible(false);
+    const handlePointerDown = () => setIsClicked(true);
+    const handlePointerUp = () => setIsClicked(false);
 
     window.addEventListener("pointermove", handlePointerMove, { passive: true });
     document.documentElement.addEventListener("mouseleave", handlePointerLeave);
+    window.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("pointerup", handlePointerUp);
 
     return () => {
       window.removeEventListener("pointermove", handlePointerMove);
       document.documentElement.removeEventListener("mouseleave", handlePointerLeave);
+      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("pointerup", handlePointerUp);
     };
   }, [enabled, xValue, yValue]);
 
   if (!enabled) {
     return null;
   }
+
+  const currentSize = isClicked ? style.size * 0.8 : style.size;
 
   return (
     <motion.div
@@ -222,19 +238,19 @@ function CustomCursor() {
       style={{
         x,
         y,
-        width: style.size,
-        height: style.size,
+        width: currentSize,
+        height: currentSize,
         opacity: visible ? 1 : 0,
         border: `1px solid rgba(245,245,245,${style.borderOpacity})`,
         background: `radial-gradient(circle, rgba(167,139,250,${style.opacity}), rgba(124,58,237,${style.glowOpacity}) 45%, transparent 72%)`,
-        boxShadow: `0 0 ${Math.round(style.size * 1.4)}px rgba(124,58,237,${style.glowOpacity})`,
+        boxShadow: `0 0 ${Math.round(currentSize * 1.4)}px rgba(124,58,237,${style.glowOpacity})`,
       }}
       animate={{
-        width: style.size,
-        height: style.size,
+        width: currentSize,
+        height: currentSize,
         opacity: visible ? 1 : 0,
       }}
-      transition={{ type: "spring", stiffness: 260, damping: 28, mass: 0.5 }}
+      transition={{ type: "spring", stiffness: 360, damping: 24, mass: 0.45 }}
     />
   );
 }
@@ -284,7 +300,17 @@ function MagneticButton({
     onPointerMove: moveTowardPointer,
     onPointerLeave: resetPosition,
     whileHover: motionDisabled ? undefined : { scale: 1.018 },
-    whileTap: motionDisabled ? undefined : { scale: 0.985 },
+    whileTap: motionDisabled
+      ? undefined
+      : ({
+          scale: 0.96,
+          transition: {
+            type: "spring" as const,
+            stiffness: 450,
+            damping: 24,
+            mass: 0.4,
+          },
+        } as const),
     transition: magneticTransition,
   };
 
@@ -349,6 +375,20 @@ function PremiumCard({
       data-cursor="card"
       variants={shouldReduceMotion ? reducedFadeUp : cinematicFadeUp}
       whileHover={shouldReduceMotion ? undefined : { y: -5, scale: 1.008 }}
+      whileTap={
+        shouldReduceMotion
+          ? undefined
+          : {
+              scale: 0.982,
+              y: -2,
+              transition: {
+                type: "spring",
+                stiffness: 450,
+                damping: 24,
+                mass: 0.4,
+              },
+            }
+      }
       transition={cardTransition}
       onPointerMove={moveCard}
       onPointerLeave={resetCard}
@@ -439,7 +479,99 @@ const processSteps = [
   },
 ];
 
+function Preloader({ onComplete }: { onComplete: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onComplete();
+    }, 1000); // Cinematic 1.0s loading feel for fast perceived performance
+    return () => clearTimeout(timer);
+  }, [onComplete]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 1 }}
+      exit={{
+        opacity: 0,
+        filter: "blur(14px)",
+        scale: 1.03, // Cinematic zoom-through
+        transition: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
+      }}
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0A0A0A]"
+    >
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_50%,rgba(124,58,237,0.06),transparent_60%)]" />
+      
+      <div className="relative flex flex-col items-center gap-6 z-10">
+        {/* Growing Frame animation */}
+        <div className="relative flex h-24 w-24 items-center justify-center">
+          {/* Glowing outer square frame */}
+          <motion.div
+            initial={{ width: 0, height: 0, opacity: 0, rotate: -45, scale: 0.8 }}
+            animate={{
+              width: 72,
+              height: 72,
+              opacity: 1,
+              rotate: 0,
+              scale: 1,
+            }}
+            transition={{
+              duration: 0.8,
+              ease: [0.16, 1, 0.3, 1], // Exp ease-out
+            }}
+            className="absolute rounded-xl border border-violet-500/40 shadow-[0_0_32px_rgba(124,58,237,0.22)]"
+          />
+          {/* Inner golden-ratio square */}
+          <motion.div
+            initial={{ width: 0, height: 0, opacity: 0, rotate: 45, scale: 0.8 }}
+            animate={{
+              width: 36,
+              height: 36,
+              opacity: 0.8,
+              rotate: 0,
+              scale: 1,
+            }}
+            transition={{
+              duration: 0.8,
+              delay: 0.1,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="absolute rounded border border-violet-400/25"
+          />
+          {/* Micro-spark/glow in center */}
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: [0, 1.25, 1], opacity: [0, 0.8, 0] }}
+            transition={{
+              duration: 1.1,
+              delay: 0.2,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="absolute h-10 w-10 rounded-full bg-gradient-to-tr from-violet-600 to-fuchsia-600 blur-md"
+          />
+        </div>
+
+        {/* Text/Subtitle fade in */}
+        <div className="overflow-hidden py-1">
+          <motion.p
+            initial={{ y: 16, opacity: 0, filter: "blur(4px)" }}
+            animate={{ y: 0, opacity: 0.9, filter: "blur(0px)" }}
+            transition={{
+              duration: 0.65,
+              delay: 0.24,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="text-[11px] font-semibold uppercase tracking-[0.45em] text-zinc-300"
+          >
+            Growframe
+          </motion.p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function Home() {
+  const [loading, setLoading] = useState(true);
+  const [preloaderFinished, setPreloaderFinished] = useState(false);
   const [navElevated, setNavElevated] = useState(false);
   const [navHidden, setNavHidden] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -553,21 +685,28 @@ export default function Home() {
 
   return (
     <MotionConfig reducedMotion="user">
-    <main className="relative min-h-screen overflow-hidden bg-[#0A0A0A] px-4 text-[#F5F5F5] selection:bg-[#7C3AED]/35 sm:px-6 lg:px-8">
-      <Atmosphere />
-      <CustomCursor />
+      <AnimatePresence onExitComplete={() => setPreloaderFinished(true)}>
+        {loading && <Preloader onComplete={() => setLoading(false)} />}
+      </AnimatePresence>
+      <main className="relative min-h-screen overflow-hidden bg-[#0A0A0A] px-4 text-[#F5F5F5] selection:bg-[#7C3AED]/35 sm:px-6 lg:px-8">
+        <Atmosphere />
+        <CustomCursor />
 
-      <motion.header
-        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -18 }}
-        animate={{ opacity: 1, y: shouldReduceMotion ? 0 : navHidden ? -86 : 0 }}
-        transition={{
-          duration: shouldReduceMotion ? 0.18 : 0.55,
-          ease: smoothEase,
-        }}
-        className={`sticky top-0 z-50 -mx-4 flex w-[calc(100%+2rem)] items-center justify-center px-4 transition-[padding] duration-500 ease-out sm:-mx-6 sm:w-[calc(100%+3rem)] sm:px-6 lg:-mx-8 lg:w-[calc(100%+4rem)] lg:px-8 ${
-          navElevated ? "py-2.5 sm:py-3" : "py-3.5 sm:py-4"
-        }`}
-      >
+        <motion.header
+          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -18 }}
+          animate={
+            !preloaderFinished
+              ? { opacity: 0, y: shouldReduceMotion ? 0 : -18 }
+              : { opacity: 1, y: shouldReduceMotion ? 0 : navHidden ? -86 : 0 }
+          }
+          transition={{
+            duration: shouldReduceMotion ? 0.18 : 0.55,
+            ease: smoothEase,
+          }}
+          className={`sticky top-0 z-50 -mx-4 flex w-[calc(100%+2rem)] items-center justify-center px-4 transition-[padding] duration-500 ease-out sm:-mx-6 sm:w-[calc(100%+3rem)] sm:px-6 lg:-mx-8 lg:w-[calc(100%+4rem)] lg:px-8 ${
+            navElevated ? "py-2.5 sm:py-3" : "py-3.5 sm:py-4"
+          }`}
+        >
         <nav className="relative w-full max-w-6xl 2xl:max-w-7xl" aria-label="Primary navigation">
           <div
             className={`relative flex w-full items-center justify-between overflow-hidden rounded-full border px-4 py-3 backdrop-blur-2xl transition-all duration-700 ease-out sm:px-5 md:px-6 ${
@@ -717,19 +856,19 @@ export default function Home() {
           hidden: {},
           visible: {
             transition: {
-              staggerChildren: 0.12,
-              delayChildren: 0.18,
+              staggerChildren: 0.08,
+              delayChildren: 0.15,
             },
           },
         }}
         initial="hidden"
-        animate="visible"
+        animate={preloaderFinished ? "visible" : "hidden"}
         className="relative z-10 mx-auto grid min-h-[calc(100svh-84px)] w-full max-w-6xl items-center gap-12 py-14 sm:py-16 lg:grid-cols-[1.04fr_0.96fr] lg:py-10 2xl:max-w-7xl"
       >
         <div className="mx-auto max-w-4xl text-center lg:mx-0 lg:text-left">
           <motion.p
             variants={fadeUp}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.8, ease: smoothEase }}
             className="mb-5 text-[11px] font-medium uppercase tracking-[0.32em] text-zinc-500 sm:mb-6 sm:text-xs sm:tracking-[0.38em]"
           >
             Growframe Media
@@ -737,7 +876,7 @@ export default function Home() {
 
           <motion.h1
             variants={fadeUp}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.9, ease: smoothEase }}
             className="text-5xl font-semibold leading-[0.92] tracking-normal text-white sm:text-7xl lg:text-8xl xl:text-9xl"
           >
             Frame Content.
@@ -748,7 +887,7 @@ export default function Home() {
 
           <motion.p
             variants={fadeUp}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.8, ease: smoothEase }}
             className="mx-auto mt-6 max-w-2xl text-balance text-base leading-7 text-zinc-400 sm:mt-7 sm:leading-8 md:text-lg lg:mx-0 lg:text-xl"
           >
             We help creators build momentum with high-retention editing,
@@ -758,7 +897,7 @@ export default function Home() {
 
           <motion.div
             variants={fadeUp}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.8, ease: smoothEase }}
             className="mt-8 flex flex-col items-center justify-center gap-3 sm:mt-9 sm:flex-row lg:justify-start"
           >
             <MagneticButton
@@ -777,7 +916,7 @@ export default function Home() {
 
         <motion.div
           variants={fadeUp}
-          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.22 }}
+          transition={{ duration: 1, ease: smoothEase, delay: 0.22 }}
           className="relative mx-auto hidden h-[520px] w-full max-w-[440px] lg:block"
         >
           <motion.div
@@ -885,7 +1024,7 @@ export default function Home() {
       </section>
 
       <section id="portfolio" className="relative z-10 mx-auto w-full max-w-6xl py-20 sm:py-24 lg:py-32 2xl:max-w-7xl">
-        <ScrollReveal amount={0.25} stagger={0.12}>
+        <ScrollReveal amount={0.25}>
           <div className="mb-10 flex flex-col justify-between gap-5 sm:mb-12 md:mb-16 md:flex-row md:items-end md:gap-8">
             <div className="max-w-2xl">
               <motion.p
@@ -951,7 +1090,7 @@ export default function Home() {
       </section>
 
       <section id="process" className="relative z-10 mx-auto w-full max-w-6xl py-20 sm:py-24 lg:py-32 2xl:max-w-7xl">
-        <ScrollReveal amount={0.25} stagger={0.11}>
+        <ScrollReveal amount={0.25}>
           <div className="mx-auto mb-12 max-w-3xl text-center sm:mb-14 md:mb-20">
             <motion.p
               variants={fadeUp}
@@ -1008,7 +1147,6 @@ export default function Home() {
       <section id="contact" className="relative z-10 mx-auto w-full max-w-6xl py-20 sm:py-24 lg:py-32 2xl:max-w-7xl">
         <ScrollReveal
           amount={0.25}
-          stagger={0.1}
           className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16"
         >
           <div className="max-w-xl lg:pt-4">
@@ -1152,7 +1290,6 @@ export default function Home() {
       <section className="relative z-10 mx-auto w-full max-w-6xl pb-20 pt-12 sm:pb-24 sm:pt-16 lg:pb-32 lg:pt-24 2xl:max-w-7xl">
         <ScrollReveal
           amount={0.35}
-          stagger={0.12}
           className="relative overflow-hidden rounded-lg border border-white/10 bg-white/[0.035] px-5 py-14 text-center shadow-[0_40px_140px_rgba(0,0,0,0.42)] backdrop-blur-2xl sm:px-6 sm:py-16 md:px-12 md:py-24"
         >
           <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_0%,rgba(124,58,237,0.18),transparent_42%),linear-gradient(180deg,rgba(255,255,255,0.055),transparent_34%)]" />
