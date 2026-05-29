@@ -2088,59 +2088,70 @@ export default function Home() {
 
       <footer className="relative z-10 mx-auto w-full max-w-6xl pb-8 sm:pb-10 2xl:max-w-7xl">
         <ScrollReveal amount={0.2} stagger={0.08}>
-          <div className="border-t border-white/10 pt-8 sm:pt-10 md:pt-12">
-            <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-[1.2fr_0.8fr_0.8fr] md:gap-12">
+          <div className="border-t border-white/8 pt-8 sm:pt-10 md:pt-12">
+            <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-[1.4fr_0.9fr_0.9fr] lg:gap-12">
               <motion.div variants={fadeUp} className="max-w-sm">
                 <p className="text-lg font-semibold text-white">Growframe</p>
                 <p className="mt-4 text-sm leading-7 text-zinc-500">
-                  Refined editing, creator systems, and scalable content
-                  operations for serious growth.
+                  Creator Growth Systems — refined editing, thumbnails, and
+                  repeatable publishing pipelines that scale attention into
+                  sustainable momentum.
                 </p>
+                <p className="mt-4 text-sm font-medium text-zinc-400">Creator Growth Systems</p>
               </motion.div>
 
               <motion.nav
                 variants={fadeUp}
-                aria-label="Footer navigation"
-                className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-zinc-400 sm:flex sm:flex-col sm:gap-1"
+                aria-label="Footer quick links"
+                className="text-sm text-zinc-400"
               >
-                <a href="#services" data-cursor="link" className="py-1.5 transition-colors duration-500 ease-out hover:text-white">
-                  Services
-                </a>
-                <a href="#portfolio" data-cursor="link" className="py-1.5 transition-colors duration-500 ease-out hover:text-white">
-                  Portfolio
-                </a>
-                <a href="#process" data-cursor="link" className="py-1.5 transition-colors duration-500 ease-out hover:text-white">
-                  Process
-                </a>
-                <a href="#contact" data-cursor="link" className="py-1.5 transition-colors duration-500 ease-out hover:text-white">
-                  Contact
-                </a>
+                <p className="mb-3 text-xs font-medium uppercase tracking-[0.28em] text-zinc-500">Quick Links</p>
+                <ul className="space-y-2">
+                  <li><a href="#" data-cursor="link" className="transition-colors duration-300 hover:text-white">Home</a></li>
+                  <li><a href="#services" data-cursor="link" className="transition-colors duration-300 hover:text-white">Services</a></li>
+                  <li><a href="#portfolio" data-cursor="link" className="transition-colors duration-300 hover:text-white">Portfolio</a></li>
+                  <li><a href="#process" data-cursor="link" className="transition-colors duration-300 hover:text-white">Process</a></li>
+                  <li><a href="#contact" data-cursor="link" className="transition-colors duration-300 hover:text-white">Contact</a></li>
+                </ul>
               </motion.nav>
 
-              <motion.div variants={fadeUp} className="space-y-3 text-sm text-zinc-400">
-                <a
-                  href="https://instagram.com/growframe"
-                  data-cursor="link"
-                  className="block py-1.5 transition-colors duration-500 ease-out hover:text-white"
-                >
-                  Instagram
-                </a>
-                <a
-                  href="mailto:hello@growframe.co"
-                  data-cursor="link"
-                  className="block py-1.5 transition-colors duration-500 ease-out hover:text-white"
-                >
-                  hello@growframe.co
-                </a>
+              <motion.div variants={fadeUp} className="text-sm text-zinc-400">
+                <p className="mb-3 text-xs font-medium uppercase tracking-[0.28em] text-zinc-500">Contact</p>
+                <a href="mailto:growframe.agency@gmail.com" className="block mb-3 text-white font-medium underline-offset-4 hover:underline">growframe.agency@gmail.com</a>
+
+                <p className="mb-2 text-xs font-medium uppercase tracking-[0.28em] text-zinc-500">Follow</p>
+                <div className="flex items-center gap-3">
+                  <a href="#" aria-label="Instagram" className="group rounded-full p-2 transition-all duration-300 hover:bg-white/6">
+                    <svg className="h-5 w-5 text-white/80 group-hover:text-white" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.5" />
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" />
+                      <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" />
+                    </svg>
+                  </a>
+                  <a href="#" aria-label="YouTube" className="group rounded-full p-2 transition-all duration-300 hover:bg-white/6">
+                    <svg className="h-5 w-5 text-white/80 group-hover:text-white" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <rect x="3" y="6" width="18" height="12" rx="3" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M10 9l5 3-5 3V9z" fill="currentColor" />
+                    </svg>
+                  </a>
+                  <a href="#" aria-label="LinkedIn" className="group rounded-full p-2 transition-all duration-300 hover:bg-white/6">
+                    <svg className="h-5 w-5 text-white/80 group-hover:text-white" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M8 11v6M8 8v.01M16 17v-4c0-1.1-.9-2-2-2s-2 .9-2 2v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </a>
+                  <a href="#" aria-label="X" className="group rounded-full p-2 transition-all duration-300 hover:bg-white/6">
+                    <svg className="h-5 w-5 text-white/80 group-hover:text-white" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </a>
+                </div>
               </motion.div>
             </div>
 
-            <motion.div
-              variants={fadeUp}
-              className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs leading-6 text-zinc-600 sm:mt-12 sm:flex-row sm:items-center sm:justify-between"
-            >
+            <motion.div variants={fadeUp} className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs leading-6 text-zinc-600 sm:mt-12 sm:flex-row sm:items-center sm:justify-between">
               <p>© 2026 Growframe. All rights reserved.</p>
-              <p>Built for creators with taste and momentum.</p>
+              <p>Built for creators who want sustainable growth.</p>
             </motion.div>
           </div>
         </ScrollReveal>
